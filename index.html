@@ -1,0 +1,1948 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>커튼콜 (CurtainCall) - 티켓팅 연습</title>
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --accent:#7c3aed;
+      --btn:#111827;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+      background:var(--bg);
+      color:#111827;
+      overscroll-behavior:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .frame{
+      width:100%;
+      max-width:430px;
+      height:100dvh;
+      margin:0 auto;
+      background:#f3f4f6;
+      position:relative;
+      overflow:hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+    }
+
+    .topbar{
+      height:56px;
+      padding:0 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(0,0,0,.55);
+      color:#fff;
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(10px);
+    }
+    .iconbtn{
+      width:36px;height:36px;border-radius:999px;
+      display:grid;place-items:center;
+      border:0;background:rgba(255,255,255,.12);
+      color:#fff;font-size:18px;
+      cursor:pointer;
+    }
+    .title{
+      flex:1;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .content{
+      height: calc(100dvh - 56px);
+      overflow:auto;
+      padding-bottom: 88px;
+      background:#fff;
+    }
+
+    .counters{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 16px;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      color:#111827;
+      position:sticky;
+      top:0;
+      z-index:5;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      font-weight:900;
+    }
+    .chip b{font-variant-numeric: tabular-nums;}
+    .spacer{flex:1}
+    .mini{
+      font-size:12px; color:var(--muted);
+      font-weight:800;
+    }
+
+    /* 하단 고정 버튼 */
+    .bottom{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding:12px 16px 18px;
+      background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,.86));
+      border-top:1px solid var(--line);
+      z-index:20;
+    }
+    .primaryBtn{
+      width:100%;
+      height:56px;
+      border-radius:14px;
+      border:0;
+      background: #9ca3af;
+      color:#fff;
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.2px;
+    }
+    .primaryBtn.ready{ background: var(--btn); cursor:pointer; }
+
+    /* 모달 */
+    .overlay{
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:50;
+    }
+    .overlay.show{display:flex;}
+    .modal{
+      width:100%;
+      max-width: 380px;
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .modalHeader{
+      padding:16px 16px 10px;
+      font-weight:1000;
+      font-size:18px;
+      border-bottom:1px solid var(--line);
+    }
+    .modalBody{padding:14px 16px; color:#111827; white-space:pre-line;}
+    .modalActions{
+      padding:14px 16px 16px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      flex:1;
+      min-width:110px;
+      height:46px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .btn.primary{
+      background:#111827;
+      color:#fff;
+      border-color:#111827;
+    }
+
+    /* 화면 전환 */
+    .screen{display:none;}
+    .screen.show{display:block;}
+
+    /* 극장 선택 */
+    .pad{padding:16px}
+    .h2{
+      font-weight:1000;
+      font-size:22px;
+      margin:6px 0 12px;
+      letter-spacing:-.3px;
+    }
+    .sub{color:var(--muted); font-weight:900; font-size:13px; margin-bottom:14px;}
+    .theaterList{display:grid; gap:14px;}
+    .theaterCard{
+      border:2px solid #e5e7eb;
+      border-radius:16px;
+      overflow:hidden;
+      background:#fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      cursor:pointer;
+      position:relative;
+    }
+    .theaterCard.sel{border-color: var(--accent); box-shadow: 0 12px 36px rgba(124,58,237,.18);}
+    .theaterCard img{width:100%; display:block; object-fit:cover;}
+    .theaterTag{
+      position:absolute; left:12px; top:12px;
+      background:rgba(17,24,39,.8);
+      color:#fff;
+      padding:7px 10px;
+      border-radius:999px;
+      font-weight:1000;
+      font-size:13px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* 예매 상세 */
+    .hero{height:210px;background:#111827;position:relative;overflow:hidden;}
+    .hero img{width:100%;height:100%;object-fit:cover;display:block;}
+    .hero .dim{position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(0,0,0,.15), rgba(0,0,0,.55)); pointer-events:none;}
+    .section{padding:14px 16px;border-bottom:1px solid var(--line);}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      background:#eef2ff;color:#4f46e5;
+      font-weight:1000;font-size:12px;margin-bottom:10px;
+    }
+    .h1{font-size:28px;line-height:1.18;font-weight:1000;letter-spacing:-.4px;margin:0 0 8px 0;word-break:keep-all;}
+    .meta{display:grid;gap:10px;color:#111827;}
+    .row{display:flex;gap:12px;align-items:flex-start;}
+    .label{width:42px;color:var(--muted);font-weight:900;}
+    .value{flex:1}
+    .muted{color:var(--muted)}
+
+    /* 대기 */
+    .waitCard{margin:14px 16px;border-radius:18px;border:1px solid var(--line);overflow:hidden;background:#fff;}
+    .waitTop{padding:18px 16px 12px;border-bottom:1px solid var(--line);}
+    .waitTop .msg1{font-weight:1000;font-size:18px;}
+    .waitTop .msg2{font-weight:1000;font-size:18px;color:var(--danger);}
+    .waitMid{padding:18px 16px 16px;text-align:center;}
+    .waitNumLabel{font-weight:900;color:var(--muted);margin-bottom:6px;}
+    .waitNum{font-weight:1000;font-size:74px;line-height:1;font-variant-numeric: tabular-nums;}
+    .bar{height:18px;background:#fee2e2;border-radius:999px;overflow:hidden;margin:16px 0 10px;border:1px solid #fecaca;}
+    .bar > div{height:100%;width:0%;background:#ef4444;border-radius:999px;transition: width .2s linear;}
+    .waitBottom{padding:10px 16px 18px;color:var(--muted);font-size:13px;line-height:1.5;border-top:1px solid var(--line);background:#fafafa;}
+    .waitStats{display:flex;justify-content:space-between;margin-top:10px;color:#111827;font-weight:1000;}
+    .waitStats span{color:var(--muted);font-weight:900;margin-right:8px;}
+
+    /* 달력 */
+    .calWrap{padding:14px 16px 8px;}
+    .calTitle{font-weight:1000;font-size:28px;text-align:center;margin:10px 0 12px;font-variant-numeric: tabular-nums;letter-spacing:-.4px;}
+    .dow{display:grid;grid-template-columns: repeat(7, 1fr);gap:6px;padding:0 4px 10px;color:var(--muted);font-weight:1000;text-align:center;}
+    .grid{display:grid;grid-template-columns: repeat(7, 1fr);gap:8px;padding:0 4px 10px;}
+    .day{height:44px;border-radius:999px;display:grid;place-items:center;font-weight:1000;color:#111827;background:#f3f4f6;border:1px solid #e5e7eb;user-select:none; cursor:pointer;}
+    .day.off{opacity:.35; cursor:default;}
+    .day.sel{background: var(--accent);color:#fff;border-color: var(--accent);transform: scale(1.02);}
+
+    /* 캡차 */
+    .capWrap{padding:14px 16px}
+    .capCard{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;}
+    .capTitle{font-weight:1000;font-size:18px;margin-bottom:10px;}
+    .capImg{
+      height:64px;border-radius:14px;border:1px dashed #c7cbd1;
+      background: linear-gradient(135deg, #f8fafc, #eef2ff);
+      display:flex;align-items:center;justify-content:center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight:1000;letter-spacing:6px;font-size:26px;position:relative;overflow:hidden;user-select:none;
+    }
+    .capImg::before{
+      content:"";position:absolute; inset:-40px;
+      background:
+        repeating-linear-gradient(20deg, rgba(0,0,0,.06) 0 2px, transparent 2px 10px),
+        repeating-linear-gradient(-12deg, rgba(124,58,237,.09) 0 2px, transparent 2px 12px);
+      transform: rotate(-4deg);opacity:.8;
+    }
+    .capImg span{position:relative; z-index:1; text-shadow: 0 2px 0 rgba(0,0,0,.06);}
+    .capRow{display:flex;gap:10px;margin-top:12px;}
+    .capRow input{
+      flex:1;height:46px;border-radius:12px;border:1px solid var(--line);
+      padding:0 12px;font-size:16px;font-weight:1000;outline:none;
+    }
+    .capRow input:focus{border-color:#c4b5fd; box-shadow:0 0 0 4px rgba(124,58,237,.12)}
+    .capRow button{
+      width:90px;height:46px;border-radius:12px;border:0;background:#111827;color:#fff;
+      font-weight:1000;font-size:15px;cursor:pointer;
+    }
+    .capHint{margin-top:10px;color:var(--muted);font-weight:900;font-size:13px;}
+    .shake{animation: shake .18s linear 0s 3;}
+    @keyframes shake{
+      0%{transform:translateX(0)}
+      25%{transform:translateX(-6px)}
+      50%{transform:translateX(6px)}
+      75%{transform:translateX(-4px)}
+      100%{transform:translateX(0)}
+    }
+
+    /* 좌석(포도알) */
+    .seatWrap{padding:14px 16px 18px}
+    .seatTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .seatTop .stTitle{font-weight:1000;font-size:18px;}
+    .seatTop .stSub{color:var(--muted);font-weight:900;font-size:13px;margin-top:4px;}
+
+    .seatTopActions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .seatTopActions .miniBtn{
+      height:34px;
+      padding:0 12px;
+      border-radius:10px;
+      border:1px solid #e5e7eb;
+      background:#111827;
+      color:#fff;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .seatTopActions .miniBtn.secondary{
+      background:#fff;
+      color:#111827;
+    }
+
+    .seatCard{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;}
+    .seatHeader{padding:12px 14px;border-bottom:1px solid var(--line);background:#fafafa;font-weight:1000;}
+    .seatStage{padding:14px;background:#fff;}
+
+    .seatBoard{
+      width:100%;
+      aspect-ratio: 1 / 1;
+      border-radius:14px;
+      border:2px solid #111827;
+      background:#f8fafc;
+      position:relative;
+      overflow:hidden;
+      touch-action:none; /* pinch/drag 제스처 받기 */
+    }
+
+    /* 줌/드래그용 뷰포트 */
+    .seatViewport{
+      position:absolute;
+      inset:0;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    /* 좌석 배치도 이미지 */
+    #seatMapImg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    /* 좌석 점(포도알) */
+    .seatDot{
+      position:absolute;
+      width: var(--dotSize, 10px);
+      height: var(--dotSize, 10px);
+      border-radius:999px;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(17,24,39,.55);
+      background: rgba(255,255,255,.55);
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      cursor:pointer;
+    }
+    .seatDot.playable{
+      border-color:#6d28d9;
+      background:#7c3aed;
+      box-shadow: 0 6px 18px rgba(124,58,237,.25);
+    }
+    .seatDot.off{
+      opacity:.18;
+      background:#e5e7eb;
+      border-color:#e5e7eb;
+      box-shadow:none;
+      cursor:not-allowed;
+    }
+    .seatDot.edit{ cursor:crosshair; }
+
+    /* 스냅 가이드 */
+    .snapGuide{
+      position:absolute;
+      width:10px;height:10px;
+      border-radius:999px;
+      transform: translate(-50%, -50%);
+      border:2px dashed rgba(124,58,237,.55);
+      background: rgba(124,58,237,.06);
+      pointer-events:none;
+    }
+
+    .seatFooter{
+      padding:12px 14px;border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fafafa;font-weight:1000;
+    }
+    .seatFooter .left{color:var(--muted);font-weight:1000;}
+    .seatFooter .right{font-variant-numeric:tabular-nums;}
+
+    /* ✅ 난이도 선택 UI */
+    .diffRow{
+      display:flex;
+      gap:10px;
+      margin:10px 0 10px;
+    }
+    .diffBtn{
+      flex:1;
+      height:44px;
+      border-radius:12px;
+      border:2px solid #e5e7eb;
+      background:#f9fafb;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .diffBtn.sel{
+      border-color: var(--accent);
+      background: rgba(124,58,237,.10);
+    }
+    .diffHint{
+      color: var(--muted);
+      font-weight:900;
+      font-size:12px;
+      line-height:1.4;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="frame" id="frame">
+    <div class="topbar">
+      <button class="iconbtn" id="navBack" aria-label="이전">←</button>
+      <div class="title" id="topTitle">커튼콜 (CurtainCall)</div>
+      <button class="iconbtn" id="noop" aria-label="빈버튼" style="opacity:.0; pointer-events:none;">⋮</button>
+    </div>
+
+    <div class="content" id="content">
+      <div class="counters">
+        <span class="chip">누적 이용자 <b id="uUsers">0</b></span>
+        <span class="chip">누적 시작 <b id="uStarts">0</b></span>
+        <span class="spacer"></span>
+        <span class="mini" id="phaseText">-</span>
+      </div>
+
+      <!-- 화면 0: 극장 선택 -->
+      <div class="screen show" id="scrTheater">
+        <div class="pad">
+          <div class="h2">극장을 선택하세요</div>
+          <div class="sub">선택 후 하단 “시작하기”를 눌러 예매 페이지로 이동해요.</div>
+
+          <div class="theaterList">
+            <div class="theaterCard" data-theater="big">
+              <span class="theaterTag">대극장</span>
+              <img src="theater_big.png" alt="대극장" />
+            </div>
+
+            <div class="theaterCard" data-theater="mid">
+              <span class="theaterTag">중극장</span>
+              <img src="theater_mid.png" alt="중극장" />
+            </div>
+
+            <div class="theaterCard" data-theater="small">
+              <span class="theaterTag">소극장</span>
+              <img src="theater_small.png" alt="소극장" />
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:14px; font-weight:900; font-size:12px;"></div>
+        </div>
+      </div>
+
+      <!-- 화면 1: 예매 상세 -->
+      <div class="screen" id="scrDetail">
+        <div class="hero">
+          <img src="poster.png" alt="포스터" />
+          <div class="dim"></div>
+        </div>
+
+        <div class="section">
+          <div class="badge" id="detailBadge">뮤지컬 · 가상</div>
+          <h1 class="h1" id="detailTitle">CurtainCall Musical</h1>
+
+          <div class="meta">
+            <div class="row"><div class="label">종류</div><div class="value">뮤지컬 · 만 8세 이상 관람가</div></div>
+            <div class="row"><div class="label">장소</div><div class="value" id="detailPlace">-</div></div>
+            <div class="row"><div class="label">기간</div><div class="value">2026.03.01 ~ 2026.03.31</div></div>
+          </div>
+        </div>
+
+        <div class="section muted" style="font-weight:900;"></div>
+      </div>
+
+      <!-- 화면 2: 대기순서 -->
+      <div class="screen" id="scrWait">
+        <div class="waitCard">
+          <div class="waitTop">
+            <div class="msg1">곧 고객님의 순서가 다가옵니다.</div>
+            <div class="msg2">예매를 준비해주세요.</div>
+          </div>
+          <div class="waitMid">
+            <div class="waitNumLabel">나의 대기순서</div>
+            <div class="waitNum" id="waitNum">----</div>
+            <div class="bar"><div id="waitBar"></div></div>
+          </div>
+          <div class="waitBottom">
+            • 잠시만 기다려주시면, 예매 페이지로 연결됩니다.<br/>
+            • 새로고침/재접속 시 대기순서가 초기화될 수 있습니다.
+            <div class="waitStats">
+              <div><span>현재 대기인원</span><b id="waitPeople">-</b></div>
+              <div><span>내 순서</span><b id="waitSmall">-</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 화면 3: 달력 -->
+      <div class="screen" id="scrCal">
+        <div class="calWrap">
+          <div class="calTitle" id="calYM">2026.03</div>
+          <div class="dow">
+            <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+          </div>
+          <div class="grid" id="calGrid"></div>
+          <div class="muted" style="padding:8px 4px 18px;font-weight:900;">
+            날짜를 누르면 다음 단계로 바로 넘어가요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 화면 4: 보안문자 -->
+      <div class="screen" id="scrCaptcha">
+        <div class="capWrap">
+          <div class="capCard" id="capCard">
+            <div class="capTitle">보안문자 입력</div>
+            <div class="capImg"><span id="capText">-----</span></div>
+            <div class="capRow">
+              <input id="capInput" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="보안문자 입력" />
+              <button id="capOk">확인</button>
+            </div>
+            <div class="capHint" id="capHint">이미지에 보이는 문자를 그대로 입력하고 확인을 눌러주세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 화면 5: 포도알(좌석) -->
+      <div class="screen" id="scrSeats">
+        <div class="seatWrap">
+          <div class="seatTop">
+            <div>
+              <div class="stTitle" id="seatTitle">포도알 잡기</div>
+              <div class="stSub" id="seatSub">남은 자리를 클릭하면 성공!</div>
+            </div>
+
+            <div class="seatTopActions">
+              <button class="miniBtn" id="editSeatsBtn" type="button">좌석설정</button>
+              <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
+              <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
+              <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
+              <button class="miniBtn secondary" id="zoomResetBtn" type="button" style="display:none;">줌 리셋</button>
+            </div>
+          </div>
+
+          <div class="seatCard">
+            <div class="seatHeader" id="seatHeaderText"></div>
+            <div class="seatStage">
+              <div class="seatBoard" id="seatBoard" aria-label="좌석 보드">
+                <div class="seatViewport" id="seatViewport">
+                  <img id="seatMapImg" alt="좌석 배치도" />
+                </div>
+              </div>
+            </div>
+            <div class="seatFooter">
+              <div class="left">남은 포도알</div>
+              <div class="right" id="remainCount">-</div>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:12px; font-weight:900; font-size:12px; line-height:1.5;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="bottom" id="bottomBar">
+      <button class="primaryBtn" id="mainBtn" disabled>시작하기</button>
+    </div>
+
+    <!-- 예매 시작 모달 -->
+    <div class="overlay" id="startOverlay">
+      <div class="modal">
+        <div class="modalHeader">연습 시작</div>
+
+        <div class="modalBody">
+          “시작하기”를 누르면 하단 버튼 자리에서 카운트다운이 시작됩니다.
+        </div>
+
+        <!-- ✅ 난이도 선택 (시작하기 위) -->
+        <div class="modalBody" style="padding-top:0;">
+          <div style="font-weight:1000; margin:6px 0 10px;">난이도 선택</div>
+
+          <div class="diffRow" role="radiogroup" aria-label="난이도 선택">
+            <button class="diffBtn" data-diff="high" type="button">상</button>
+            <button class="diffBtn" data-diff="mid"  type="button">중</button>
+            <button class="diffBtn" data-diff="low"  type="button">하</button>
+          </div>
+
+          <div class="diffHint" id="diffHint">-</div>
+        </div>
+
+        <div class="modalActions">
+          <button class="btn" id="startCancel">닫기</button>
+          <button class="btn primary" id="startGo">시작하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 메시지 모달 -->
+    <div class="overlay" id="msgOverlay">
+      <div class="modal">
+        <div class="modalHeader" id="msgTitle">안내</div>
+        <div class="modalBody" id="msgBody">-</div>
+        <div class="modalActions" id="msgActions"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/***************
+ * 헬퍼
+ ***************/
+function $(sel){ return document.querySelector(sel); }
+function $all(sel){ return Array.from(document.querySelectorAll(sel)); }
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function clampInt(v, a, b){
+  v = parseInt(v,10);
+  if(Number.isNaN(v)) v = a;
+  return Math.max(a, Math.min(b, v));
+}
+function clampNum(v, a, b){
+  v = Number(v);
+  if(!Number.isFinite(v)) v = a;
+  return Math.max(a, Math.min(b, v));
+}
+function fmtSec(ms){
+  const s = Math.max(0, ms/1000);
+  return s.toFixed(2);
+}
+
+/***************
+ * 로컬 카운터
+ ***************/
+const LS = {
+  uid: "curtaincall_uid",
+  users: "curtaincall_users_local",
+  starts: "curtaincall_starts_local",
+  settings: "curtaincall_settings_v1",
+  snapBig: "cc_snap_big_v1",
+  snapMid: "cc_snap_mid_v1",
+  snapSmall: "cc_snap_small_v1",
+};
+
+function uuid(){
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{
+    const r = (Math.random()*16)|0;
+    const v = c==="x" ? r : (r&0x3)|0x8;
+    return v.toString(16);
+  });
+}
+
+function initCounters(){
+  let uid = localStorage.getItem(LS.uid);
+  if(!uid){
+    uid = uuid();
+    localStorage.setItem(LS.uid, uid);
+    const u = parseInt(localStorage.getItem(LS.users) || "0", 10) || 0;
+    localStorage.setItem(LS.users, String(u + 1));
+  }
+  renderCounters();
+}
+function incStarts(){
+  const s = parseInt(localStorage.getItem(LS.starts) || "0", 10) || 0;
+  localStorage.setItem(LS.starts, String(s + 1));
+  renderCounters();
+}
+function renderCounters(){
+  const users = parseInt(localStorage.getItem(LS.users) || "0", 10) || 0;
+  const starts = parseInt(localStorage.getItem(LS.starts) || "0", 10) || 0;
+  $("#uUsers").textContent = users.toLocaleString();
+  $("#uStarts").textContent = starts.toLocaleString();
+}
+
+/***************
+ * 설정
+ ***************/
+function loadSettings(){
+  const raw = localStorage.getItem(LS.settings);
+  const base = { captcha:"on", countdownSec:10, failRate:0.50, difficulty:"mid" };
+  if(!raw) return base;
+  try{
+    const o = JSON.parse(raw);
+    return {
+      captcha: (o.captcha==="off" ? "off" : "on"),
+      countdownSec: clampInt(o.countdownSec ?? 10, 3, 30),
+      failRate: clampNum(o.failRate ?? 0.50, 0.01, 0.99),
+      difficulty: (o.difficulty==="high" || o.difficulty==="low" || o.difficulty==="mid") ? o.difficulty : "mid",
+    };
+  }catch{
+    return base;
+  }
+}
+function saveSettings(s){
+  localStorage.setItem(LS.settings, JSON.stringify(s));
+}
+
+/***************
+ * 난이도
+ ***************/
+function diffKor(){
+  const d = app.settings.difficulty || "mid";
+  if(d === "high") return "상";
+  if(d === "low") return "하";
+  return "중";
+}
+function diffHintText(){
+  const d = app.settings.difficulty || "mid";
+  if(d === "high") return "상: 대기번호 빡셈 · 남은 포도알 25개";
+  if(d === "mid")  return "중: 대기번호 중간 · 남은 포도알 40개";
+  return "하: 대기번호 쉬움 · 남은 포도알 100개";
+}
+function renderDiffUI(){
+  const d = app.settings.difficulty || "mid";
+  $all(".diffBtn").forEach(btn=>{
+    btn.classList.toggle("sel", btn.dataset.diff === d);
+  });
+  const hint = $("#diffHint");
+  if(hint) hint.textContent = diffHintText();
+}
+function targetRemainByDifficulty(){
+  const d = app.settings.difficulty || "mid";
+  if(d === "high") return 25;
+  if(d === "mid") return 40;
+  return 100;
+}
+function applyInitialRemainFixed(grapes, remainTarget){
+  const total = grapes.length;
+  remainTarget = Math.max(1, Math.min(total, remainTarget));
+
+  grapes.forEach(g => g.alive = false);
+
+  const idxs = Array.from({length: total}, (_,i)=>i);
+  for(let i=idxs.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+  }
+  for(let k=0;k<remainTarget;k++){
+    grapes[idxs[k]].alive = true;
+  }
+  return { remainTarget, soldOutCount: total - remainTarget };
+}
+
+/***************
+ * 상태
+ ***************/
+const Phase = Object.freeze({
+  THEATER:"THEATER",
+  DETAIL:"DETAIL",
+  COUNTDOWN:"COUNTDOWN",
+  READY:"READY",
+  WAIT:"WAIT",
+  CAL:"CAL",
+  CAPTCHA:"CAPTCHA",
+  SEATS:"SEATS",
+});
+
+const app = {
+  phase: Phase.THEATER,
+  settings: loadSettings(),
+  selectedTheater: null,
+
+  // 타이밍
+  readyAt: null,
+  bookClickedAt: null,
+  captchaShownAt: null,
+  captchaPassedAt: null,
+  seatsShownAt: null,
+  seatsSuccessAt: null,
+
+  // 진행
+  countdownLeft: 10,
+  countdownTimer: null,
+  wait: { start:0, timer:null, totalMs:0 },
+  pickedDate: null,
+  captchaAnswer: "",
+
+  // 포도알(좌석 점)
+  grapes: [],
+  grapeTimer: null,
+
+  // 좌석 편집
+  seatEdit: false,
+  seatPoints: [],         // [{x,y}]
+  seatKey: null,
+
+  // 스냅 가이드
+  snapGuide: [],
+  snapKey: null,
+
+  // 줌/드래그
+  view: {
+    scale: 1,
+    tx: 0,
+    ty: 0,
+    dragging: false,
+    dragStart: {x:0,y:0, tx:0, ty:0},
+    pinch: null,
+  }
+};
+
+function phaseLabel(p){
+  switch(p){
+    case Phase.THEATER: return "극장 선택";
+    case Phase.DETAIL: return "예매 상세";
+    case Phase.COUNTDOWN: return "카운트다운";
+    case Phase.READY: return "예매 가능";
+    case Phase.WAIT: return "대기중";
+    case Phase.CAL: return "날짜 선택";
+    case Phase.CAPTCHA: return "보안문자";
+    case Phase.SEATS: return "포도알";
+    default: return "-";
+  }
+}
+
+function setPhase(p){
+  app.phase = p;
+  $("#phaseText").textContent = phaseLabel(p);
+  showOnly(p);
+
+  if(p===Phase.THEATER) $("#topTitle").textContent = "커튼콜 (CurtainCall)";
+  else if(p===Phase.DETAIL || p===Phase.COUNTDOWN || p===Phase.READY) $("#topTitle").textContent = "예매 페이지";
+  else if(p===Phase.WAIT) $("#topTitle").textContent = "예매 대기";
+  else if(p===Phase.CAL) $("#topTitle").textContent = "날짜 선택";
+  else if(p===Phase.CAPTCHA) $("#topTitle").textContent = "보안문자";
+  else if(p===Phase.SEATS) $("#topTitle").textContent = "포도알 잡기";
+}
+
+function showOnly(phase){
+  const map = {
+    [Phase.THEATER]:"scrTheater",
+    [Phase.DETAIL]:"scrDetail",
+    [Phase.COUNTDOWN]:"scrDetail",
+    [Phase.READY]:"scrDetail",
+    [Phase.WAIT]:"scrWait",
+    [Phase.CAL]:"scrCal",
+    [Phase.CAPTCHA]:"scrCaptcha",
+    [Phase.SEATS]:"scrSeats",
+  };
+  const showId = map[phase];
+  $all(".screen").forEach(el=>el.classList.remove("show"));
+  $("#"+showId).classList.add("show");
+
+  if(phase===Phase.THEATER || phase===Phase.DETAIL || phase===Phase.COUNTDOWN || phase===Phase.READY){
+    $("#bottomBar").style.display = "block";
+  }else{
+    $("#bottomBar").style.display = "none";
+  }
+
+  $("#content").scrollTop = 0;
+}
+
+/***************
+ * 하단 버튼
+ ***************/
+function setMainButton(text, enabled){
+  const btn = $("#mainBtn");
+  btn.textContent = text;
+  btn.disabled = !enabled;
+  btn.classList.toggle("ready", !!enabled);
+}
+
+/***************
+ * 극장 선택 → 상세 반영
+ ***************/
+function applyTheaterToDetail(){
+  const t = app.selectedTheater;
+  const place =
+    t==="big" ? "대극장" :
+    t==="mid" ? "중극장" :
+    t==="small" ? "소극장" : "-";
+
+  $("#detailPlace").textContent = `CurtainCall ${place}`;
+  $("#detailTitle").textContent = `CurtainCall Musical (${place})`;
+  $("#detailBadge").textContent = "뮤지컬 · 가상";
+}
+
+function theaterName(t){
+  if(t==="big") return "대극장";
+  if(t==="mid") return "중극장";
+  if(t==="small") return "소극장";
+  return "-";
+}
+
+/***************
+ * 좌석 이미지/저장키
+ ***************/
+function getSeatMapInfo(){
+  const t = app.selectedTheater || "big";
+  const mapSrc =
+    t==="big" ? "theater_big.png" :
+    t==="mid" ? "theater_mid.png" :
+    "theater_small.png";
+
+  const seatKey =
+    t==="big" ? "cc_seats_big_v1" :
+    t==="mid" ? "cc_seats_mid_v1" :
+    "cc_seats_small_v1";
+
+  const snapKey =
+    t==="big" ? LS.snapBig :
+    t==="mid" ? LS.snapMid :
+    LS.snapSmall;
+
+  return { mapSrc, seatKey, snapKey };
+}
+
+function loadSeatPoints(){
+  const { mapSrc, seatKey, snapKey } = getSeatMapInfo();
+  app.seatKey = seatKey;
+  app.snapKey = snapKey;
+
+  const img = $("#seatMapImg");
+  if(img) img.src = mapSrc;
+
+  const raw = localStorage.getItem(seatKey);
+  let points = [];
+  if(raw){
+    try{
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr)) points = arr;
+    }catch{}
+  }
+
+  // 스냅 가이드 로드
+  const sg = localStorage.getItem(snapKey);
+  app.snapGuide = [];
+  if(sg){
+    try{
+      const arr = JSON.parse(sg);
+      if(Array.isArray(arr)) app.snapGuide = arr;
+    }catch{}
+  }
+
+  return points;
+}
+function saveSeatPoints(){
+  if(!app.seatKey) return;
+  localStorage.setItem(app.seatKey, JSON.stringify(app.seatPoints));
+}
+function saveSnapGuide(){
+  if(!app.snapKey) return;
+  localStorage.setItem(app.snapKey, JSON.stringify(app.snapGuide));
+}
+
+/***************
+ * 예매 상세 흐름
+ ***************/
+function openStartOverlay(){
+  renderDiffUI();
+  $("#startOverlay").classList.add("show");
+}
+function closeStartOverlay(){ $("#startOverlay").classList.remove("show"); }
+
+function startCountdown(){
+  stopCountdown();
+  app.countdownLeft = app.settings.countdownSec;
+  setPhase(Phase.COUNTDOWN);
+  setMainButton(formatMMSS(app.countdownLeft), false);
+
+  app.countdownTimer = setInterval(()=>{
+    app.countdownLeft -= 1;
+    if(app.countdownLeft <= 0){
+      stopCountdown();
+      setPhase(Phase.READY);
+      setMainButton("예매하기", true);
+      app.readyAt = performance.now();
+      return;
+    }
+    setMainButton(formatMMSS(app.countdownLeft), false);
+  }, 1000);
+}
+function stopCountdown(){
+  if(app.countdownTimer){
+    clearInterval(app.countdownTimer);
+    app.countdownTimer = null;
+  }
+}
+function formatMMSS(sec){
+  const s = Math.max(0, sec|0);
+  const mm = String(Math.floor(s/60)).padStart(2,"0");
+  const ss = String(s%60).padStart(2,"0");
+  return `${mm}:${ss}`;
+}
+
+function onClickBook(){
+  if(app.phase !== Phase.READY) return;
+
+  app.bookClickedAt = performance.now();
+
+  const delta = Math.max(0, app.bookClickedAt - (app.readyAt ?? app.bookClickedAt));
+  const waitNum = computeWaitNumber(delta/1000);
+  const people = computeWaitPeople(waitNum);
+
+  $("#waitPeople").textContent = people.toLocaleString() + "명";
+  $("#waitNum").textContent = String(waitNum);
+  $("#waitSmall").textContent = String(waitNum);
+  $("#waitBar").style.width = "0%";
+
+  setPhase(Phase.WAIT);
+  runWait(waitNum);
+}
+
+/**
+ * ✅ 난이도별 대기번호 규칙
+ */
+function computeWaitNumber(deltaSec){
+  const d = app.settings.difficulty || "mid";
+  const make = (base)=> base + randInt(0, 999);
+
+  // 상: 0.1->2000 / 0.2->4000 / 0.3->6000 / 0.4->8000 ...
+  if(d === "high"){
+    if(deltaSec <= 0.10) return make(2000);
+    if(deltaSec <= 0.20) return make(4000);
+    if(deltaSec <= 0.30) return make(6000);
+    if(deltaSec <= 0.40) return make(8000);
+    if(deltaSec <= 0.50) return make(10000);
+    if(deltaSec <= 0.60) return make(12000);
+    return make(14000);
+  }
+
+  // 중: 0.1->1000 / 0.2->3000 / 0.3->5000 / 0.5->6000 / 0.6->8000 ...
+  if(d === "mid"){
+    if(deltaSec <= 0.10) return make(1000);
+    if(deltaSec <= 0.20) return make(3000);
+    if(deltaSec <= 0.30) return make(5000);
+    if(deltaSec <= 0.50) return make(6000);
+    if(deltaSec <= 0.60) return make(8000);
+    if(deltaSec <= 0.70) return make(10000);
+    return make(12000);
+  }
+
+  // 하: 0.1->500 / 0.2->1000 / 0.3->2000 / 0.4->3000 ...
+  if(deltaSec <= 0.10) return make(500);
+  if(deltaSec <= 0.20) return make(1000);
+  if(deltaSec <= 0.30) return make(2000);
+  if(deltaSec <= 0.40) return make(3000);
+  if(deltaSec <= 0.50) return make(4000);
+  if(deltaSec <= 0.60) return make(5000);
+  return make(6000);
+}
+
+function computeWaitPeople(waitNum){
+  return waitNum + randInt(8000, 35000);
+}
+
+function runWait(startNum){
+  stopWait();
+  app.wait.start = startNum;
+
+  const bucket = Math.max(1, Math.min(12, Math.floor(startNum / 1000)));
+  const totalSec = 2.8 + bucket * 0.9 + Math.random()*1.8;
+  app.wait.totalMs = totalSec * 1000;
+
+  const t0 = performance.now();
+  app.wait.timer = setInterval(()=>{
+    const t = performance.now();
+    const progress = Math.min(1, (t - t0) / app.wait.totalMs);
+    const remain = Math.max(0, Math.round(app.wait.start * (1 - progress)));
+
+    $("#waitNum").textContent = String(remain);
+    $("#waitSmall").textContent = String(remain);
+    $("#waitBar").style.width = (progress*100).toFixed(1) + "%";
+
+    if(progress >= 1){
+      stopWait();
+      enterCalendar();
+    }
+  }, 120);
+}
+function stopWait(){
+  if(app.wait.timer){
+    clearInterval(app.wait.timer);
+    app.wait.timer = null;
+  }
+}
+
+/***************
+ * 달력
+ ***************/
+function enterCalendar(){
+  setPhase(Phase.CAL);
+  app.pickedDate = null;
+  buildCalendar(2026, 3, 30);
+}
+function buildCalendar(year, month, days){
+  $("#calYM").textContent = `${year}.${String(month).padStart(2,"0")}`;
+  const grid = $("#calGrid");
+  grid.innerHTML = "";
+
+  const offset = 2;
+  for(let i=0;i<offset;i++){
+    const d = document.createElement("div");
+    d.className = "day off";
+    d.textContent = "";
+    grid.appendChild(d);
+  }
+  for(let day=1; day<=days; day++){
+    const d = document.createElement("div");
+    d.className = "day";
+    d.textContent = String(day);
+    d.addEventListener("click", ()=>{
+      $all(".day").forEach(x=>x.classList.remove("sel"));
+      d.classList.add("sel");
+
+      app.pickedDate = `${year}.${String(month).padStart(2,"0")}.${String(day).padStart(2,"0")}`;
+
+      setTimeout(()=>{
+        if(app.settings.captcha === "off") enterSeats(true);
+        else enterCaptcha();
+      }, 160);
+    });
+    grid.appendChild(d);
+  }
+}
+
+/***************
+ * 보안문자
+ ***************/
+function enterCaptcha(){
+  setPhase(Phase.CAPTCHA);
+  app.captchaShownAt = performance.now();
+  regenCaptcha();
+  $("#capInput").value = "";
+  $("#capInput").focus({preventScroll:true});
+  $("#capHint").textContent = "이미지에 보이는 문자를 그대로 입력하고 확인을 눌러주세요.";
+}
+function regenCaptcha(){
+  app.captchaAnswer = makeCaptchaText(5);
+  $("#capText").textContent = app.captchaAnswer;
+}
+function makeCaptchaText(len){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for(let i=0;i<len;i++){
+    s += chars[Math.floor(Math.random()*chars.length)];
+  }
+  return s;
+}
+function onCaptchaOk(){
+  const val = ($("#capInput").value || "").trim().toUpperCase();
+  if(val === app.captchaAnswer){
+    app.captchaPassedAt = performance.now();
+    enterSeats(true);
+  }else{
+    const card = $("#capCard");
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+    $("#capHint").textContent = "보안문자가 일치하지 않습니다. 다시 입력해주세요.";
+    regenCaptcha();
+    $("#capInput").value = "";
+    $("#capInput").focus({preventScroll:true});
+  }
+}
+
+/***************
+ * ✅ 줌/드래그 유틸
+ ***************/
+function applyViewTransform(){
+  const vp = $("#seatViewport");
+  const v = app.view;
+  vp.style.transform = `translate(${v.tx}px, ${v.ty}px) scale(${v.scale})`;
+}
+function resetView(){
+  app.view.scale = 1;
+  app.view.tx = 0;
+  app.view.ty = 0;
+  applyViewTransform();
+}
+function boardRect(){
+  return $("#seatBoard").getBoundingClientRect();
+}
+function clientToBoardPercent(clientX, clientY){
+  const rect = boardRect();
+  const v = app.view;
+
+  const localX = (clientX - rect.left - v.tx) / v.scale;
+  const localY = (clientY - rect.top  - v.ty) / v.scale;
+
+  const x = (localX / rect.width)  * 100;
+  const y = (localY / rect.height) * 100;
+  return { x, y };
+}
+function clampView(){
+  const rect = boardRect();
+  const v = app.view;
+  const minScale = 1;
+  const maxScale = 4;
+  v.scale = clampNum(v.scale, minScale, maxScale);
+
+  const maxTx = rect.width  * (v.scale - 1);
+  const maxTy = rect.height * (v.scale - 1);
+
+  v.tx = clampNum(v.tx, -maxTx - 40, 40);
+  v.ty = clampNum(v.ty, -maxTy - 40, 40);
+}
+function zoomAt(clientX, clientY, nextScale){
+  const rect = boardRect();
+  const v = app.view;
+
+  const prevScale = v.scale;
+  nextScale = clampNum(nextScale, 1, 4);
+
+  const px = clientX - rect.left;
+  const py = clientY - rect.top;
+
+  const worldX = (px - v.tx) / prevScale;
+  const worldY = (py - v.ty) / prevScale;
+
+  v.scale = nextScale;
+  v.tx = px - worldX * nextScale;
+  v.ty = py - worldY * nextScale;
+
+  clampView();
+  applyViewTransform();
+}
+
+/***************
+ * ✅ 스냅
+ ***************/
+function dist(a,b){
+  const dx = a.x-b.x, dy=a.y-b.y;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+function snapToGuide(p){
+  if(!app.snapGuide || app.snapGuide.length === 0) return p;
+
+  let best = null;
+  let bestD = Infinity;
+  for(const g of app.snapGuide){
+    const d = dist(p, g);
+    if(d < bestD){
+      bestD = d;
+      best = g;
+    }
+  }
+  if(best && bestD <= 2.2) return { x: best.x, y: best.y };
+  return p;
+}
+function renderSnapGuide(){
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
+  if(!app.seatEdit) return;
+  if(!app.snapGuide || app.snapGuide.length === 0) return;
+
+  const show = app.snapGuide.slice(0, 350);
+  for(const p of show){
+    const el = document.createElement("div");
+    el.className = "snapGuide";
+    el.style.left = p.x + "%";
+    el.style.top  = p.y + "%";
+    vp.appendChild(el);
+  }
+}
+
+/**
+ * 스냅 가이드 생성 (간이 원형 감지)
+ */
+async function buildSnapGuideFromImage(){
+  const img = $("#seatMapImg");
+  if(!img || !img.complete){
+    showMsg("잠깐!", "좌석 이미지를 불러오는 중이야. 이미지가 뜬 다음 다시 눌러줘!", [
+      { text:"확인", kind:"primary", onClick: hideMsg }
+    ]);
+    return;
+  }
+
+  const size = 600;
+  const cvs = document.createElement("canvas");
+  cvs.width = size; cvs.height = size;
+  const ctx = cvs.getContext("2d", { willReadFrequently: true });
+
+  ctx.clearRect(0,0,size,size);
+  const iw = img.naturalWidth || 1;
+  const ih = img.naturalHeight || 1;
+  const scale = Math.min(size/iw, size/ih);
+  const dw = iw*scale, dh = ih*scale;
+  const dx = (size - dw)/2;
+  const dy = (size - dh)/2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+
+  const id = ctx.getImageData(0,0,size,size);
+  const data = id.data;
+
+  const gray = new Float32Array(size*size);
+  for(let i=0;i<size*size;i++){
+    const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+    gray[i] = (0.2126*r + 0.7152*g + 0.0722*b);
+  }
+  const grad = new Float32Array(size*size);
+  for(let y=1;y<size-1;y++){
+    for(let x=1;x<size-1;x++){
+      const i = y*size + x;
+      const gx = Math.abs(gray[i+1] - gray[i-1]);
+      const gy = Math.abs(gray[i+size] - gray[i-size]);
+      grad[i] = gx + gy;
+    }
+  }
+
+  const angles = [];
+  for(let k=0;k<16;k++){
+    const a = (Math.PI*2*k)/16;
+    angles.push({cx: Math.cos(a), sy: Math.sin(a)});
+  }
+
+  const candidates = [];
+  const step = 5;
+  const r = 11;
+  const margin = 20;
+
+  for(let y=margin; y<size-margin; y+=step){
+    for(let x=margin; x<size-margin; x+=step){
+      let score = 0;
+      for(const a of angles){
+        const rx = Math.round(x + a.cx*r);
+        const ry = Math.round(y + a.sy*r);
+        const idx = ry*size + rx;
+        score += grad[idx];
+      }
+      if(score > 220){
+        candidates.push({x,y,score});
+      }
+    }
+  }
+
+  candidates.sort((a,b)=>b.score-a.score);
+
+  const picked = [];
+  const minDist = 14;
+  for(const c of candidates){
+    if(picked.length >= 900) break;
+    let ok = true;
+    for(const p of picked){
+      const dx2 = p.x - c.x;
+      const dy2 = p.y - c.y;
+      if((dx2*dx2 + dy2*dy2) < (minDist*minDist)){
+        ok = false; break;
+      }
+    }
+    if(ok) picked.push(c);
+  }
+
+  const guide = [];
+  for(const p of picked){
+    if(p.x < dx || p.x > dx+dw || p.y < dy || p.y > dy+dh) continue;
+
+    const nx = (p.x - dx) / dw;
+    const ny = (p.y - dy) / dh;
+
+    const bx = ((dx + nx*dw) / size) * 100;
+    const by = ((dy + ny*dh) / size) * 100;
+
+    guide.push({x: bx, y: by});
+  }
+
+  app.snapGuide = guide;
+  saveSnapGuide();
+  renderSnapGuide();
+
+  showMsg("스냅 가이드 생성 완료", `가이드 ${guide.length}개 만들었어!\n이제 좌석 찍을 때 근처 원 중심으로 자동 보정돼.`, [
+    { text:"확인", kind:"primary", onClick: hideMsg }
+  ]);
+}
+
+/***************
+ * ✅ 좌석 편집 모드
+ ***************/
+function setSeatEditMode(on){
+  app.seatEdit = on;
+
+  $("#saveSeatsBtn").style.display = on ? "inline-grid" : "none";
+  $("#resetSeatsBtn").style.display = on ? "inline-grid" : "none";
+  $("#snapBuildBtn").style.display = on ? "inline-grid" : "none";
+  $("#zoomResetBtn").style.display = on ? "inline-grid" : "none";
+  $("#editSeatsBtn").textContent = on ? "편집중" : "좌석설정";
+
+  if(on){
+    stopGrapeDisappear();
+    $("#seatHeaderText").textContent = "* 편집모드: 드래그 이동 / 휠 줌 / 클릭=좌석 추가 / Shift+클릭=근처 좌석 삭제 / 저장 누르면 영구 저장!";
+    $("#seatSub").textContent = `극장: ${theaterName(app.selectedTheater)} · 좌석을 찍어줘`;
+    resetView();
+    renderSnapGuide();
+    renderSeatDotsForEdit();
+  }else{
+    enterSeats(false);
+  }
+}
+
+function seatBoardClickToEdit(e){
+  if(!app.seatEdit) return;
+  if(e.target && (e.target.closest && e.target.closest(".seatDot"))) return;
+
+  const p0 = clientToBoardPercent(e.clientX, e.clientY);
+  const p = snapToGuide(p0);
+
+  if(e.shiftKey){
+    if(app.seatPoints.length === 0) return;
+    let bestIdx = -1;
+    let bestDist = Infinity;
+
+    app.seatPoints.forEach((s, idx)=>{
+      const d = dist(s, p);
+      if(d < bestDist){
+        bestDist = d;
+        bestIdx = idx;
+      }
+    });
+
+    if(bestIdx !== -1 && bestDist <= 2.8){
+      app.seatPoints.splice(bestIdx, 1);
+      renderSeatDotsForEdit();
+    }
+    return;
+  }
+
+  const tooClose = app.seatPoints.some(s => dist(s, p) < 1.0);
+  if(tooClose) return;
+
+  app.seatPoints.push({x: p.x, y: p.y});
+  renderSeatDotsForEdit();
+}
+
+function renderSeatDotsForEdit(){
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+
+  app.seatPoints.forEach((p, idx)=>{
+    const dot = document.createElement("div");
+    dot.className = "seatDot playable edit";
+    dot.style.left = p.x + "%";
+    dot.style.top  = p.y + "%";
+
+    // ✅ 버그 수정: Shift 눌렀을 때만 삭제
+    dot.addEventListener("click", (ev)=>{
+      ev.stopPropagation();
+      if(ev.shiftKey){
+        app.seatPoints.splice(idx, 1);
+        renderSeatDotsForEdit();
+      }
+    });
+
+    vp.appendChild(dot);
+  });
+
+  $("#remainCount").textContent = String(app.seatPoints.length);
+  renderSnapGuide();
+}
+
+/***************
+ * ✅ 포도알(좌석) 게임
+ ***************/
+function enterSeats(resetAlive){
+  setPhase(Phase.SEATS);
+
+  app.seatEdit = false;
+  $("#saveSeatsBtn").style.display = "none";
+  $("#resetSeatsBtn").style.display = "none";
+  $("#snapBuildBtn").style.display = "none";
+  $("#zoomResetBtn").style.display = "none";
+  $("#editSeatsBtn").textContent = "좌석설정";
+
+  resetView();
+
+  // 로드 (localStorage에서)
+  app.seatPoints = loadSeatPoints();
+
+  // 🎯 극장별 포도알 크기 설정
+  let size;
+  if(app.selectedTheater === "big") size = "4px";
+  else if(app.selectedTheater === "mid") size = "7px";
+  else size = "10px";
+  document.documentElement.style.setProperty('--dotSize', size);
+
+  app.seatsShownAt = performance.now();
+  app.seatsSuccessAt = null;
+
+  $("#seatTitle").textContent = "포도알 잡기";
+  $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
+
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+  Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
+
+  if(app.seatPoints.length === 0){
+    stopGrapeDisappear();
+    app.grapes = [];
+    $("#seatHeaderText").textContent = "* 아직 좌석이 없어! ‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
+    $("#remainCount").textContent = "0";
+    return;
+  }
+
+  // grapes 생성
+  app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
+
+  // ✅ 난이도에 따라 시작 시 남아있는 포도알 수 고정: 상=25 / 중=40 / 하=100
+  const remainTarget = targetRemainByDifficulty();
+  const { remainTarget: actualRemain, soldOutCount } = applyInitialRemainFixed(app.grapes, remainTarget);
+
+  $("#seatHeaderText").textContent =
+    `* 난이도 ${diffKor()} · 시작 시 이미 빠진 좌석 ${soldOutCount}개 (남은 포도알 ${actualRemain}개)`;
+
+  renderGrapes();
+  startGrapeDisappear();
+}
+
+function renderGrapes(){
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+
+  let aliveCount = 0;
+
+  app.grapes.forEach((g)=>{
+    const dot = document.createElement("div");
+    dot.className = "seatDot" + (g.alive ? " playable" : " off");
+    dot.style.left = g.x + "%";
+    dot.style.top  = g.y + "%";
+
+    if(g.alive){
+      aliveCount++;
+      dot.addEventListener("click", (ev)=>{
+        ev.stopPropagation();
+        if(app.seatEdit) return;
+
+        if(Math.random() < app.settings.failRate){
+          showMsg("이미 선택된 좌석입니다", "다른 좌석을 선택해주세요.", [
+            { text:"확인", kind:"primary", onClick: hideMsg }
+          ]);
+          return;
+        }
+
+        g.alive = false;
+        app.seatsSuccessAt = performance.now();
+        stopGrapeDisappear();
+        renderGrapes();
+        showSuccessModal();
+      });
+    }
+    vp.appendChild(dot);
+  });
+
+  $("#remainCount").textContent = String(aliveCount);
+}
+
+function startGrapeDisappear(){
+  stopGrapeDisappear();
+
+  const loop = ()=>{
+    const delay = 200 + Math.random()*300; // 200~500ms
+    app.grapeTimer = setTimeout(()=>{
+      removeTwoGrapes();
+      loop();
+    }, delay);
+  };
+  loop();
+}
+function stopGrapeDisappear(){
+  if(app.grapeTimer){
+    clearTimeout(app.grapeTimer);
+    app.grapeTimer = null;
+  }
+}
+function removeTwoGrapes(){
+  if(app.seatEdit) return;
+
+  const alive = app.grapes.filter(x=>x.alive);
+  if(alive.length === 0){
+    renderGrapes();
+    return;
+  }
+
+  for(let i=0;i<2;i++){
+    if(alive.length === 0) break;
+    const idx = randInt(0, alive.length-1);
+    const pick = alive[idx];
+    pick.alive = false;
+    alive.splice(idx, 1);
+  }
+
+  renderGrapes();
+}
+
+/***************
+ * 성공 모달
+ ***************/
+function showSuccessModal(){
+  const bookMs = (app.bookClickedAt && app.readyAt) ? (app.bookClickedAt - app.readyAt) : null;
+  const capMs  = (app.captchaPassedAt && app.captchaShownAt) ? (app.captchaPassedAt - app.captchaShownAt) : null;
+  const seatMs = (app.seatsSuccessAt && app.seatsShownAt) ? (app.seatsSuccessAt - app.seatsShownAt) : null;
+
+  const lines = [];
+  lines.push("좌석 선택에 성공했습니다!");
+  lines.push("");
+  lines.push("기록");
+  lines.push(`- 예매하기 클릭: ${bookMs===null ? "-" : fmtSec(bookMs)}초`);
+  lines.push(`- 보안문자 입력: ${capMs===null ? "-" : fmtSec(capMs)}초`);
+  lines.push(`- 포도알 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
+
+  showMsg("성공!", lines.join("\n"), [
+    {
+      text:"처음으로",
+      kind:"primary",
+      onClick: ()=>{
+        hideMsg();
+        resetToTheater();
+      }
+    },
+    {
+      text:"보안문자부터",
+      kind:"",
+      onClick: ()=>{
+        hideMsg();
+        stopGrapeDisappear();
+        enterCaptcha();
+      }
+    },
+    {
+      text:"포도알 다시",
+      kind:"",
+      onClick: ()=>{
+        hideMsg();
+        stopGrapeDisappear();
+        enterSeats(true);
+      }
+    }
+  ]);
+}
+
+/***************
+ * 메시지 모달
+ ***************/
+function showMsg(title, body, actions){
+  $("#msgTitle").textContent = title;
+  $("#msgBody").textContent = body;
+
+  const wrap = $("#msgActions");
+  wrap.innerHTML = "";
+
+  const btns = actions && actions.length ? actions : [{ text:"확인", kind:"primary", onClick: hideMsg }];
+  btns.forEach(b=>{
+    const btn = document.createElement("button");
+    btn.className = "btn" + (b.kind==="primary" ? " primary" : "");
+    btn.textContent = b.text;
+    btn.addEventListener("click", b.onClick || hideMsg);
+    wrap.appendChild(btn);
+  });
+
+  $("#msgOverlay").classList.add("show");
+}
+function hideMsg(){
+  $("#msgOverlay").classList.remove("show");
+}
+
+/***************
+ * 리셋
+ * ✅ 주의: localStorage(좌석 저장)는 절대 삭제 안 함.
+ ***************/
+function resetToTheater(){
+  stopCountdown();
+  stopWait();
+  stopGrapeDisappear();
+  closeStartOverlay();
+
+  app.selectedTheater = null;
+  app.pickedDate = null;
+  app.captchaAnswer = "";
+
+  app.readyAt = null;
+  app.bookClickedAt = null;
+  app.captchaShownAt = null;
+  app.captchaPassedAt = null;
+  app.seatsShownAt = null;
+  app.seatsSuccessAt = null;
+
+  app.seatEdit = false;
+  app.seatPoints = [];
+  app.seatKey = null;
+  app.snapGuide = [];
+  app.snapKey = null;
+  app.grapes = [];
+
+  resetView();
+
+  $all(".theaterCard").forEach(x=>x.classList.remove("sel"));
+
+  setPhase(Phase.THEATER);
+  setMainButton("시작하기", false);
+}
+
+/***************
+ * ← 이전으로
+ ***************/
+function onBack(){
+  switch(app.phase){
+    case Phase.SEATS:
+      stopGrapeDisappear();
+      if(app.settings.captcha==="off") setPhase(Phase.CAL);
+      else setPhase(Phase.CAPTCHA);
+      break;
+
+    case Phase.CAPTCHA:
+      setPhase(Phase.CAL);
+      break;
+
+    case Phase.CAL:
+      setPhase(Phase.DETAIL);
+      setMainButton("판매가 종료되었습니다.", false);
+      openStartOverlay();
+      break;
+
+    case Phase.WAIT:
+      stopWait();
+      setPhase(Phase.DETAIL);
+      setMainButton("판매가 종료되었습니다.", false);
+      openStartOverlay();
+      break;
+
+    case Phase.READY:
+    case Phase.COUNTDOWN:
+    case Phase.DETAIL:
+      resetToTheater();
+      break;
+
+    case Phase.THEATER:
+    default:
+      break;
+  }
+}
+
+/***************
+ * 부트
+ ***************/
+function boot(){
+  initCounters();
+  saveSettings(app.settings);
+
+  setPhase(Phase.THEATER);
+  setMainButton("시작하기", false);
+
+  // 극장 선택
+  $all(".theaterCard").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      $all(".theaterCard").forEach(x=>x.classList.remove("sel"));
+      card.classList.add("sel");
+
+      app.selectedTheater = card.dataset.theater;
+      setMainButton("시작하기", true);
+    });
+  });
+
+  // 하단 버튼
+  $("#mainBtn").addEventListener("click", ()=>{
+    if(app.phase === Phase.THEATER){
+      if(!app.selectedTheater) return;
+      applyTheaterToDetail();
+      setPhase(Phase.DETAIL);
+      setMainButton("판매가 종료되었습니다.", false);
+      openStartOverlay();
+      return;
+    }
+    if(app.phase === Phase.READY){
+      onClickBook();
+      return;
+    }
+  });
+
+  // start overlay
+  $("#startCancel").addEventListener("click", closeStartOverlay);
+  $("#startGo").addEventListener("click", ()=>{
+    closeStartOverlay();
+    incStarts();
+    startCountdown();
+  });
+
+  // 난이도 버튼
+  $all(".diffBtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      app.settings.difficulty = btn.dataset.diff; // high/mid/low
+      saveSettings(app.settings);
+      renderDiffUI();
+    });
+  });
+  renderDiffUI();
+
+  // 캡차
+  $("#capOk").addEventListener("click", onCaptchaOk);
+  $("#capInput").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") onCaptchaOk();
+  });
+
+  // ← 버튼
+  $("#navBack").addEventListener("click", onBack);
+
+  // 좌석 편집 토글
+  $("#editSeatsBtn").addEventListener("click", ()=>{
+    if(app.phase !== Phase.SEATS) return;
+
+    if(!app.seatEdit){
+      app.seatPoints = loadSeatPoints();
+      setSeatEditMode(true);
+    }else{
+      setSeatEditMode(false);
+    }
+  });
+
+  // 저장/초기화/스냅/줌리셋
+  $("#saveSeatsBtn").addEventListener("click", ()=>{
+    if(!app.seatEdit) return;
+    saveSeatPoints();
+    showMsg("저장 완료", `좌석 ${app.seatPoints.length}개 저장했어!\n(극장별로 따로 저장돼)`, [
+      { text:"확인", kind:"primary", onClick: hideMsg }
+    ]);
+  });
+
+  $("#resetSeatsBtn").addEventListener("click", ()=>{
+    if(!app.seatEdit) return;
+    // ✅ 여기서 초기화해도 '저장' 누르기 전까진 localStorage 안 바뀜
+    app.seatPoints = [];
+    renderSeatDotsForEdit();
+  });
+
+  $("#snapBuildBtn").addEventListener("click", async ()=>{
+    if(!app.seatEdit) return;
+    await buildSnapGuideFromImage();
+  });
+
+  $("#zoomResetBtn").addEventListener("click", ()=>{
+    resetView();
+  });
+
+  // 좌석 보드 클릭(편집에서 좌석 추가/삭제)
+  $("#seatBoard").addEventListener("click", seatBoardClickToEdit);
+
+  // 줌(휠)
+  $("#seatBoard").addEventListener("wheel", (e)=>{
+    if(!app.seatEdit) return;
+    e.preventDefault();
+    const delta = e.deltaY;
+    const factor = delta > 0 ? 0.92 : 1.08;
+    zoomAt(e.clientX, e.clientY, app.view.scale * factor);
+  }, { passive:false });
+
+  // 드래그/핀치 (Pointer Events)
+  const board = $("#seatBoard");
+  board.addEventListener("pointerdown", (e)=>{
+    if(!app.seatEdit) return;
+    board.setPointerCapture(e.pointerId);
+
+    board._pointers = board._pointers || new Map();
+    board._pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+    if(board._pointers.size === 1){
+      app.view.dragging = true;
+      app.view.dragStart = {x:e.clientX, y:e.clientY, tx:app.view.tx, ty:app.view.ty};
+    }else if(board._pointers.size === 2){
+      const pts = Array.from(board._pointers.values());
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const midX = (pts[0].x + pts[1].x)/2;
+      const midY = (pts[0].y + pts[1].y)/2;
+      app.view.pinch = {dist, midX, midY, scale:app.view.scale, tx:app.view.tx, ty:app.view.ty};
+      app.view.dragging = false;
+    }
+  });
+
+  board.addEventListener("pointermove", (e)=>{
+    if(!app.seatEdit) return;
+
+    if(board._pointers && board._pointers.has(e.pointerId)){
+      board._pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    }
+
+    if(board._pointers && board._pointers.size === 2 && app.view.pinch){
+      const pts = Array.from(board._pointers.values());
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const midX = (pts[0].x + pts[1].x)/2;
+      const midY = (pts[0].y + pts[1].y)/2;
+
+      const ratio = dist / (app.view.pinch.dist || dist);
+      const nextScale = app.view.pinch.scale * ratio;
+
+      zoomAt(midX, midY, nextScale);
+      return;
+    }
+
+    if(app.view.dragging){
+      const dx = e.clientX - app.view.dragStart.x;
+      const dy = e.clientY - app.view.dragStart.y;
+      app.view.tx = app.view.dragStart.tx + dx;
+      app.view.ty = app.view.dragStart.ty + dy;
+      clampView();
+      applyViewTransform();
+    }
+  });
+
+  function endPointer(e){
+    if(!app.seatEdit) return;
+    if(board._pointers){
+      board._pointers.delete(e.pointerId);
+    }
+    if(board._pointers && board._pointers.size < 2){
+      app.view.pinch = null;
+    }
+    if(board._pointers && board._pointers.size === 0){
+      app.view.dragging = false;
+    }
+  }
+  board.addEventListener("pointerup", endPointer);
+  board.addEventListener("pointercancel", endPointer);
+  board.addEventListener("pointerleave", endPointer);
+
+  // 시작 모달 바깥 클릭 닫기
+  $("#startOverlay").addEventListener("click", (e)=>{
+    if(e.target === $("#startOverlay")) closeStartOverlay();
+  });
+}
+
+boot();
+</script>
+</body>
+</html>
