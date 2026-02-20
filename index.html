@@ -123,6 +123,34 @@
     }
     .primaryBtn.ready{ background: var(--btn); cursor:pointer; }
 
+    /* ✅ 광고 컨테이너 (예매 시작 전 팝업 영역) */
+    .adSlot{
+      margin: 12px 16px 0;
+      border: 1px dashed #c7cbd1;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px;
+      color: #64748b;
+      font-weight: 900;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .adSlot small{display:block; font-weight:800; color:#94a3b8; margin-top:6px;}
+    .adSlot.hidden{ display:none; }
+
+    /* ✅ 성공 후 배너 광고 슬롯 */
+    .adBanner{
+      border: 1px dashed #c7cbd1;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color:#64748b;
+      font-weight: 900;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .adBanner small{display:block; font-weight:800; color:#94a3b8; margin-top:4px;}
+
     /* 모달 */
     .overlay{
       position:absolute;
@@ -325,6 +353,17 @@
       color:#111827;
     }
 
+    /* 🔒 잠김 상태 버튼 느낌 */
+    .miniBtn.locked{
+      background:#111827;
+      position:relative;
+      opacity:.92;
+    }
+    .miniBtn.locked::after{
+      content:"🔒";
+      margin-left:6px;
+    }
+
     .seatCard{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff;}
     .seatHeader{padding:12px 14px;border-bottom:1px solid var(--line);background:#fafafa;font-weight:1000;}
     .seatStage{padding:14px;background:#fff;}
@@ -337,7 +376,7 @@
       background:#f8fafc;
       position:relative;
       overflow:hidden;
-      touch-action:none; /* pinch/drag 제스처 받기 */
+      touch-action:none;
     }
 
     /* 줌/드래그용 뷰포트 */
@@ -430,6 +469,41 @@
       line-height:1.4;
       margin-bottom: 2px;
     }
+
+    /* ✅ 포도알/좌석 줌 UI (게임/편집 모두 사용) */
+    .zoomUI{
+      position: fixed;
+      right: 14px;
+      bottom: 16px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background: rgba(0,0,0,.55);
+      padding: 10px 12px;
+      border-radius: 14px;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+    }
+    .zoomUI button{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 0;
+      background: rgba(255,255,255,.18);
+      color:#fff;
+      font-weight:1000;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .zoomUI span{
+      color:#fff;
+      font-weight:1000;
+      min-width: 62px;
+      text-align:center;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+    }
+    .zoomUI.hidden{ display:none; }
   </style>
 </head>
 
@@ -495,6 +569,12 @@
         </div>
 
         <div class="section muted" style="font-weight:900;"></div>
+
+        <!-- ✅ "시작하기 누르기 전" 팝업 광고 자리 -->
+        <div class="adSlot" id="adPreStart">
+          📌 (광고 자리) 시작 전 팝업/전면 광고 컨테이너<br/>
+          <small>여기에 AdSense/Adfit 코드(또는 커스텀 팝업)를 넣으면 됨. 시뮬 시작 후에는 자동 숨김.</small>
+        </div>
       </div>
 
       <!-- 화면 2: 대기순서 -->
@@ -559,7 +639,7 @@
             </div>
 
             <div class="seatTopActions">
-              <button class="miniBtn" id="editSeatsBtn" type="button">좌석설정</button>
+              <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
               <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
               <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
               <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
@@ -626,9 +706,31 @@
       <div class="modal">
         <div class="modalHeader" id="msgTitle">안내</div>
         <div class="modalBody" id="msgBody">-</div>
+
+        <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
+        <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
+          <div class="adBanner" id="adBannerTop">
+            (광고 자리) 성공 후 상단 배너
+            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          </div>
+          <div style="height:10px"></div>
+          <div class="adBanner" id="adBannerBottom">
+            (광고 자리) 성공 후 하단 배너
+            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          </div>
+        </div>
+
         <div class="modalActions" id="msgActions"></div>
       </div>
     </div>
+
+    <!-- ✅ 좌석/포도알 줌 컨트롤 (게임/편집 공용) -->
+    <div class="zoomUI hidden" id="zoomUI" aria-label="확대 축소 컨트롤">
+      <button id="zoomOut" type="button" aria-label="축소">-</button>
+      <span id="zoomLabel">100%</span>
+      <button id="zoomIn" type="button" aria-label="확대">+</button>
+    </div>
+
   </div>
 
 <script>
@@ -766,6 +868,15 @@ function applyInitialRemainFixed(grapes, remainTarget){
 }
 
 /***************
+ * ✅ 광고 컨테이너 표시 제어
+ ***************/
+function setPreStartAdVisible(visible){
+  const el = $("#adPreStart");
+  if(!el) return;
+  el.classList.toggle("hidden", !visible);
+}
+
+/***************
  * 상태
  ***************/
 const Phase = Object.freeze({
@@ -779,10 +890,18 @@ const Phase = Object.freeze({
   SEATS:"SEATS",
 });
 
+/***************
+ * ✅ 좌석 편집 잠금 비번
+ ***************/
+const ADMIN_PW = "jolver48@@";
+
 const app = {
   phase: Phase.THEATER,
   settings: loadSettings(),
   selectedTheater: null,
+
+  // 🔒 좌석 편집 잠금 (기본 잠금)
+  seatLocked: true,
 
   // 타이밍
   readyAt: null,
@@ -837,6 +956,43 @@ function phaseLabel(p){
   }
 }
 
+/***************
+ * ✅ 잠금 버튼 UI 업데이트
+ ***************/
+function updateSeatLockUI(){
+  const btn = $("#editSeatsBtn");
+  if(!btn) return;
+
+  // 편집 중이면 "편집중"이 더 중요하니까 여기서 건드리지 않음
+  if(app.seatEdit) return;
+
+  btn.classList.toggle("locked", app.seatLocked);
+  // 텍스트는 그대로 "좌석설정", lock 아이콘은 ::after로 붙음
+}
+
+/***************
+ * ✅ 줌 UI 표시/동작 (게임/편집 공용)
+ ***************/
+function updateZoomUI(){
+  const z = $("#zoomUI");
+  if(!z) return;
+  const show = (app.phase === Phase.SEATS);
+  z.classList.toggle("hidden", !show);
+  if(show){
+    const pct = Math.round(app.view.scale * 100);
+    $("#zoomLabel").textContent = `${pct}%`;
+  }
+}
+
+function zoomUISet(delta){
+  const next = app.view.scale + delta;
+  const rect = boardRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  zoomAt(cx, cy, next);
+  updateZoomUI();
+}
+
 function setPhase(p){
   app.phase = p;
   $("#phaseText").textContent = phaseLabel(p);
@@ -848,6 +1004,15 @@ function setPhase(p){
   else if(p===Phase.CAL) $("#topTitle").textContent = "날짜 선택";
   else if(p===Phase.CAPTCHA) $("#topTitle").textContent = "보안문자";
   else if(p===Phase.SEATS) $("#topTitle").textContent = "포도알 잡기";
+
+  // ✅ 예매 시작 전(DETAIL)에서만 사전 광고 보이게
+  setPreStartAdVisible(p === Phase.DETAIL);
+
+  // ✅ 줌 UI 업데이트
+  updateZoomUI();
+
+  // ✅ 좌석 잠금 버튼 UI (좌석 화면에서)
+  if(p === Phase.SEATS) updateSeatLockUI();
 }
 
 function showOnly(phase){
@@ -1032,7 +1197,6 @@ function computeWaitNumber(deltaSec){
   const d = app.settings.difficulty || "mid";
   const make = (base)=> base + randInt(0, 999);
 
-  // 상: 0.1->2000 / 0.2->4000 / 0.3->6000 / 0.4->8000 ...
   if(d === "high"){
     if(deltaSec <= 0.10) return make(2000);
     if(deltaSec <= 0.20) return make(4000);
@@ -1043,7 +1207,6 @@ function computeWaitNumber(deltaSec){
     return make(14000);
   }
 
-  // 중: 0.1->1000 / 0.2->3000 / 0.3->5000 / 0.5->6000 / 0.6->8000 ...
   if(d === "mid"){
     if(deltaSec <= 0.10) return make(1000);
     if(deltaSec <= 0.20) return make(3000);
@@ -1054,7 +1217,6 @@ function computeWaitNumber(deltaSec){
     return make(12000);
   }
 
-  // 하: 0.1->500 / 0.2->1000 / 0.3->2000 / 0.4->3000 ...
   if(deltaSec <= 0.10) return make(500);
   if(deltaSec <= 0.20) return make(1000);
   if(deltaSec <= 0.30) return make(2000);
@@ -1191,6 +1353,7 @@ function resetView(){
   app.view.tx = 0;
   app.view.ty = 0;
   applyViewTransform();
+  updateZoomUI();
 }
 function boardRect(){
   return $("#seatBoard").getBoundingClientRect();
@@ -1209,7 +1372,7 @@ function clientToBoardPercent(clientX, clientY){
 function clampView(){
   const rect = boardRect();
   const v = app.view;
-  const minScale = 1;
+  const minScale = 0.6;   // ✅ 게임에서도 축소 허용
   const maxScale = 4;
   v.scale = clampNum(v.scale, minScale, maxScale);
 
@@ -1224,7 +1387,7 @@ function zoomAt(clientX, clientY, nextScale){
   const v = app.view;
 
   const prevScale = v.scale;
-  nextScale = clampNum(nextScale, 1, 4);
+  nextScale = clampNum(nextScale, 0.6, 4);
 
   const px = clientX - rect.left;
   const py = clientY - rect.top;
@@ -1238,6 +1401,7 @@ function zoomAt(clientX, clientY, nextScale){
 
   clampView();
   applyViewTransform();
+  updateZoomUI();
 }
 
 /***************
@@ -1397,9 +1561,10 @@ function setSeatEditMode(on){
   $("#resetSeatsBtn").style.display = on ? "inline-grid" : "none";
   $("#snapBuildBtn").style.display = on ? "inline-grid" : "none";
   $("#zoomResetBtn").style.display = on ? "inline-grid" : "none";
-  $("#editSeatsBtn").textContent = on ? "편집중" : "좌석설정";
 
   if(on){
+    $("#editSeatsBtn").classList.remove("locked");
+    $("#editSeatsBtn").textContent = "편집중";
     stopGrapeDisappear();
     $("#seatHeaderText").textContent = "* 편집모드: 드래그 이동 / 휠 줌 / 클릭=좌석 추가 / Shift+클릭=근처 좌석 삭제 / 저장 누르면 영구 저장!";
     $("#seatSub").textContent = `극장: ${theaterName(app.selectedTheater)} · 좌석을 찍어줘`;
@@ -1407,6 +1572,7 @@ function setSeatEditMode(on){
     renderSnapGuide();
     renderSeatDotsForEdit();
   }else{
+    // 편집 끝나면 다시 게임 진입
     enterSeats(false);
   }
 }
@@ -1455,7 +1621,6 @@ function renderSeatDotsForEdit(){
     dot.style.left = p.x + "%";
     dot.style.top  = p.y + "%";
 
-    // ✅ 버그 수정: Shift 눌렀을 때만 삭제
     dot.addEventListener("click", (ev)=>{
       ev.stopPropagation();
       if(ev.shiftKey){
@@ -1483,13 +1648,12 @@ function enterSeats(resetAlive){
   $("#snapBuildBtn").style.display = "none";
   $("#zoomResetBtn").style.display = "none";
   $("#editSeatsBtn").textContent = "좌석설정";
+  updateSeatLockUI();
 
   resetView();
 
-  // 로드 (localStorage에서)
   app.seatPoints = loadSeatPoints();
 
-  // 🎯 극장별 포도알 크기 설정
   let size;
   if(app.selectedTheater === "big") size = "4px";
   else if(app.selectedTheater === "mid") size = "7px";
@@ -1514,10 +1678,8 @@ function enterSeats(resetAlive){
     return;
   }
 
-  // grapes 생성
   app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
 
-  // ✅ 난이도에 따라 시작 시 남아있는 포도알 수 고정: 상=25 / 중=40 / 하=100
   const remainTarget = targetRemainByDifficulty();
   const { remainTarget: actualRemain, soldOutCount } = applyInitialRemainFixed(app.grapes, remainTarget);
 
@@ -1570,7 +1732,7 @@ function startGrapeDisappear(){
   stopGrapeDisappear();
 
   const loop = ()=>{
-    const delay = 200 + Math.random()*300; // 200~500ms
+    const delay = 200 + Math.random()*300;
     app.grapeTimer = setTimeout(()=>{
       removeTwoGrapes();
       loop();
@@ -1619,6 +1781,8 @@ function showSuccessModal(){
   lines.push(`- 예매하기 클릭: ${bookMs===null ? "-" : fmtSec(bookMs)}초`);
   lines.push(`- 보안문자 입력: ${capMs===null ? "-" : fmtSec(capMs)}초`);
   lines.push(`- 포도알 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
+
+  $("#successAds").style.display = "block";
 
   showMsg("성공!", lines.join("\n"), [
     {
@@ -1673,6 +1837,7 @@ function showMsg(title, body, actions){
 }
 function hideMsg(){
   $("#msgOverlay").classList.remove("show");
+  $("#successAds").style.display = "none";
 }
 
 /***************
@@ -1695,6 +1860,9 @@ function resetToTheater(){
   app.captchaPassedAt = null;
   app.seatsShownAt = null;
   app.seatsSuccessAt = null;
+
+  // ✅ 리셋하면 다시 잠금
+  app.seatLocked = true;
 
   app.seatEdit = false;
   app.seatPoints = [];
@@ -1761,6 +1929,10 @@ function boot(){
   setPhase(Phase.THEATER);
   setMainButton("시작하기", false);
 
+  // ✅ 줌 UI 버튼 연결
+  $("#zoomIn").addEventListener("click", ()=> zoomUISet(+0.15));
+  $("#zoomOut").addEventListener("click", ()=> zoomUISet(-0.15));
+
   // 극장 선택
   $all(".theaterCard").forEach(card=>{
     card.addEventListener("click", ()=>{
@@ -1799,7 +1971,7 @@ function boot(){
   // 난이도 버튼
   $all(".diffBtn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
-      app.settings.difficulty = btn.dataset.diff; // high/mid/low
+      app.settings.difficulty = btn.dataset.diff;
       saveSettings(app.settings);
       renderDiffUI();
     });
@@ -1815,30 +1987,51 @@ function boot(){
   // ← 버튼
   $("#navBack").addEventListener("click", onBack);
 
-  // 좌석 편집 토글
+  // 🔒 좌석 편집 토글 (+ 비밀번호)
   $("#editSeatsBtn").addEventListener("click", ()=>{
     if(app.phase !== Phase.SEATS) return;
 
-    if(!app.seatEdit){
-      app.seatPoints = loadSeatPoints();
-      setSeatEditMode(true);
-    }else{
+    // 이미 편집중이면 바로 종료
+    if(app.seatEdit){
       setSeatEditMode(false);
+      return;
     }
+
+    // 잠겨있으면 비번 요구
+    if(app.seatLocked){
+      const pw = prompt("좌석 편집 비밀번호를 입력하세요");
+      if(pw !== ADMIN_PW){
+        alert("비밀번호가 틀렸습니다.");
+        return;
+      }
+      app.seatLocked = false;
+      updateSeatLockUI();
+      alert("편집모드가 활성화되었습니다.");
+    }
+
+    app.seatPoints = loadSeatPoints();
+    setSeatEditMode(true);
   });
 
   // 저장/초기화/스냅/줌리셋
   $("#saveSeatsBtn").addEventListener("click", ()=>{
     if(!app.seatEdit) return;
+
     saveSeatPoints();
-    showMsg("저장 완료", `좌석 ${app.seatPoints.length}개 저장했어!\n(극장별로 따로 저장돼)`, [
+
+    // ✅ 저장하면 다시 잠금
+    app.seatLocked = true;
+
+    showMsg("저장 완료", `좌석 ${app.seatPoints.length}개 저장했어!\n(극장별로 따로 저장돼)\n저장 후 편집 잠금(🔒)도 다시 걸었어!`, [
       { text:"확인", kind:"primary", onClick: hideMsg }
     ]);
+
+    // 편집 끝내고 게임으로 돌아가면 잠금 UI가 적용됨
+    setSeatEditMode(false);
   });
 
   $("#resetSeatsBtn").addEventListener("click", ()=>{
     if(!app.seatEdit) return;
-    // ✅ 여기서 초기화해도 '저장' 누르기 전까진 localStorage 안 바뀜
     app.seatPoints = [];
     renderSeatDotsForEdit();
   });
@@ -1855,19 +2048,17 @@ function boot(){
   // 좌석 보드 클릭(편집에서 좌석 추가/삭제)
   $("#seatBoard").addEventListener("click", seatBoardClickToEdit);
 
-  // 줌(휠)
+  // ✅ 휠 줌: 게임/편집 공용
   $("#seatBoard").addEventListener("wheel", (e)=>{
-    if(!app.seatEdit) return;
     e.preventDefault();
     const delta = e.deltaY;
     const factor = delta > 0 ? 0.92 : 1.08;
     zoomAt(e.clientX, e.clientY, app.view.scale * factor);
   }, { passive:false });
 
-  // 드래그/핀치 (Pointer Events)
+  // ✅ 드래그/핀치: 게임/편집 공용
   const board = $("#seatBoard");
   board.addEventListener("pointerdown", (e)=>{
-    if(!app.seatEdit) return;
     board.setPointerCapture(e.pointerId);
 
     board._pointers = board._pointers || new Map();
@@ -1889,8 +2080,6 @@ function boot(){
   });
 
   board.addEventListener("pointermove", (e)=>{
-    if(!app.seatEdit) return;
-
     if(board._pointers && board._pointers.has(e.pointerId)){
       board._pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
     }
@@ -1917,11 +2106,11 @@ function boot(){
       app.view.ty = app.view.dragStart.ty + dy;
       clampView();
       applyViewTransform();
+      updateZoomUI();
     }
   });
 
   function endPointer(e){
-    if(!app.seatEdit) return;
     if(board._pointers){
       board._pointers.delete(e.pointerId);
     }
