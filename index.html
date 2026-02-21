@@ -503,7 +503,7 @@
       font-variant-numeric: tabular-nums;
       font-size: 12px;
     }
-    .zoomUI.hidden{ display:none; } 
+    .zoomUI.hidden{ display:none; }
 
     /* ✅ 좌석 내보내기/가져오기용 텍스트 영역 */
     .transferArea{
@@ -658,8 +658,7 @@
             </div>
 
             <div class="seatTopActions">
-              <!-- ✅ 사용자에게 아예 숨김 처리 -->
-              <button class="miniBtn locked" id="editSeatsBtn" type="button" style="display:none;">좌석설정</button>
+              <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
               <button class="miniBtn secondary" id="exportSeatsBtn" type="button" style="display:none;">내보내기</button>
               <button class="miniBtn secondary" id="importSeatsBtn" type="button" style="display:none;">가져오기</button>
 
@@ -704,7 +703,6 @@
           '시작하기'를 누르면 10초 카운트다운 후 '예매하기' 버튼이 활성화됩니다.
         </div>
 
-        <!-- ✅ 난이도 선택 (시작하기 위) -->
         <div class="modalBody" style="padding-top:0;">
           <div style="font-weight:1000; margin:6px 0 10px;">난이도 선택</div>
 
@@ -731,7 +729,6 @@
 
         <div class="modalBody" id="msgBody">-</div>
 
-        <!-- ✅ 내보내기/가져오기 텍스트 영역 (필요할 때만 표시) -->
         <div class="modalBody" id="transferBox" style="display:none; padding-top:0;">
           <textarea id="transferArea" class="transferArea" spellcheck="false" placeholder="여기에 붙여넣기 / 여기서 복사하기"></textarea>
           <div class="muted" style="margin-top:8px; font-weight:900; font-size:12px; line-height:1.4;">
@@ -740,7 +737,6 @@
           </div>
         </div>
 
-        <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
         <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
           <div class="adBanner" id="adBannerTop">
             (광고 자리) 성공 후 상단 배너
@@ -767,6 +763,15 @@
   </div>
 
 <script>
+/***************
+ * ✅ 기본 좌석 JSON URL (big/mid/small)
+ ***************/
+const SEAT_JSON_URLS = {
+  big:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/big.json",
+  mid:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/mid.json",
+  small: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/small.json",
+};
+
 /***************
  * 헬퍼
  ***************/
@@ -825,15 +830,11 @@ function incStarts(){
   renderCounters();
 }
 function renderCounters(){
-  const users = parseInt(localStorage.getItem(LS.users) || "0", 10) || 0;
   const starts = parseInt(localStorage.getItem(LS.starts) || "0", 10) || 0;
-
-  const uUsers = $("#uUsers");
-  if(uUsers) uUsers.textContent = users.toLocaleString();
-
   const uStarts = $("#uStarts");
   if(uStarts) uStarts.textContent = starts.toLocaleString();
 }
+
 /***************
  * 설정
  ***************/
@@ -936,10 +937,8 @@ const app = {
   settings: loadSettings(),
   selectedTheater: null,
 
-  // 🔒 좌석 편집 잠금 (기본 잠금)
   seatLocked: true,
 
-  // 타이밍
   readyAt: null,
   bookClickedAt: null,
   captchaShownAt: null,
@@ -947,30 +946,27 @@ const app = {
   seatsShownAt: null,
   seatsSuccessAt: null,
 
-  // ✅ 포도알 실패 모달 중복 방지
   seatFailShown: false,
 
-  // 진행
   countdownLeft: 10,
   countdownTimer: null,
   wait: { start:0, timer:null, totalMs:0 },
   pickedDate: null,
   captchaAnswer: "",
 
-  // 포도알(좌석 점)
   grapes: [],
   grapeTimer: null,
 
-  // 좌석 편집
   seatEdit: false,
-  seatPoints: [],         // [{x,y}]
+  seatPoints: [],
   seatKey: null,
 
-  // 스냅 가이드
   snapGuide: [],
   snapKey: null,
 
-  // 줌/드래그
+  // ✅ 기본 좌석 로드 중 중복 fetch 방지
+  preload: { promise: null },
+
   view: {
     scale: 1,
     tx: 0,
@@ -1040,13 +1036,9 @@ function setPhase(p){
   else if(p===Phase.CAPTCHA) $("#topTitle").textContent = "보안문자";
   else if(p===Phase.SEATS) $("#topTitle").textContent = "자리 잡기";
 
-  // ✅ 예매 시작 전(DETAIL)에서만 사전 광고 보이게
   setPreStartAdVisible(p === Phase.DETAIL);
-
-  // ✅ 줌 UI 업데이트
   updateZoomUI();
 
-  // ✅ 좌석 잠금 버튼 UI (좌석 화면에서)
   if(p === Phase.SEATS) updateSeatLockUI();
 }
 
@@ -1126,9 +1118,71 @@ function getSeatMapInfo(){
     t==="mid" ? LS.snapMid :
     LS.snapSmall;
 
-  return { mapSrc, seatKey, snapKey };
+  const url = SEAT_JSON_URLS[t] || SEAT_JSON_URLS.big;
+
+  return { mapSrc, seatKey, snapKey, url };
 }
 
+/***************
+ * ✅ 기본 좌석 JSON을 받아서 localStorage에 저장 (처음 1회)
+ * - 형식 지원:
+ *   1) [ {x,y}, ... ]
+ *   2) { seatPoints:[...], snapGuide:[...] } (export 형태)
+ ***************/
+async function fetchDefaultSeatsIfNeeded(){
+  const { seatKey, snapKey, url } = getSeatMapInfo();
+
+  // 이미 로컬에 있으면 스킵
+  const existing = localStorage.getItem(seatKey);
+  if(existing){
+    try{
+      const arr = JSON.parse(existing);
+      if(Array.isArray(arr) && arr.length) return true;
+    }catch{}
+  }
+
+  try{
+    const res = await fetch(url, { cache: "no-store" });
+    if(!res.ok) throw new Error("http");
+    const txt = await res.text();
+    const data = JSON.parse(txt);
+
+    let seatPoints = [];
+    let snapGuide = [];
+
+    if(Array.isArray(data)){
+      seatPoints = data;
+    }else if(data && Array.isArray(data.seatPoints)){
+      seatPoints = data.seatPoints;
+      if(Array.isArray(data.snapGuide)) snapGuide = data.snapGuide;
+      // 혹시 field명이 seatpoints 같은 변형이면 확장 가능
+    }else if(data && Array.isArray(data.points)){
+      seatPoints = data.points;
+    }
+
+    // 좌표 형태 검증(대충)
+    seatPoints = seatPoints
+      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
+      .map(p => ({ x: p.x, y: p.y }));
+
+    snapGuide = (Array.isArray(snapGuide) ? snapGuide : [])
+      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
+      .map(p => ({ x: p.x, y: p.y }));
+
+    if(seatPoints.length){
+      localStorage.setItem(seatKey, JSON.stringify(seatPoints));
+      localStorage.setItem(snapKey, JSON.stringify(snapGuide));
+      return true;
+    }
+    return false;
+  }catch{
+    return false;
+  }
+}
+
+/***************
+ * ✅ 좌석/스냅 로드
+ ***************/
 function loadSeatPoints(){
   const { mapSrc, seatKey, snapKey } = getSeatMapInfo();
   app.seatKey = seatKey;
@@ -1146,7 +1200,6 @@ function loadSeatPoints(){
     }catch{}
   }
 
-  // 스냅 가이드 로드
   const sg = localStorage.getItem(snapKey);
   app.snapGuide = [];
   if(sg){
@@ -1165,6 +1218,36 @@ function saveSeatPoints(){
 function saveSnapGuide(){
   if(!app.snapKey) return;
   localStorage.setItem(app.snapKey, JSON.stringify(app.snapGuide));
+}
+
+/***************
+ * ✅ 좌석이 비어있으면 원격 JSON에서 자동 로드 후 다시 로드
+ ***************/
+async function ensureSeatPointsLoaded(){
+  // 중복 호출 방지
+  if(app.preload.promise) return app.preload.promise;
+
+  app.preload.promise = (async ()=>{
+    // 1) 먼저 현재 로컬 로드
+    let pts = loadSeatPoints();
+    if(pts && pts.length){
+      app.seatPoints = pts;
+      return true;
+    }
+
+    // 2) 로컬에 없으면 기본 JSON fetch
+    const ok = await fetchDefaultSeatsIfNeeded();
+
+    // 3) 다시 로드
+    pts = loadSeatPoints();
+    app.seatPoints = pts;
+
+    return !!(ok && pts && pts.length);
+  })();
+
+  const result = await app.preload.promise;
+  app.preload.promise = null;
+  return result;
 }
 
 /***************
@@ -1225,9 +1308,6 @@ function onClickBook(){
   runWait(waitNum);
 }
 
-/**
- * ✅ 난이도별 대기번호 규칙
- */
 function computeWaitNumber(deltaSec){
   const d = app.settings.difficulty || "mid";
   const make = (base)=> base + randInt(0, 999);
@@ -1561,7 +1641,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(오케이) picked.push(c); // ✅ 버그 수정 (오케이 → ok)
+    if(오케이) picked.push(c);
   }
 
   const guide = [];
@@ -1596,6 +1676,9 @@ function setSeatEditMode(on){
   $("#resetSeatsBtn").style.display = on ? "inline-grid" : "none";
   $("#snapBuildBtn").style.display = on ? "inline-grid" : "none";
   $("#zoomResetBtn").style.display = on ? "inline-grid" : "none";
+
+  $("#exportSeatsBtn").style.display = on ? "inline-grid" : "none";
+  $("#importSeatsBtn").style.display = on ? "inline-grid" : "none";
 
   if(on){
     $("#editSeatsBtn").classList.remove("locked");
@@ -1674,56 +1757,63 @@ function renderSeatDotsForEdit(){
  * ✅ 포도알(좌석) 게임
  ***************/
 function enterSeats(resetAlive){
-  setPhase(Phase.SEATS);
+  // async가 필요해서 내부에서 실행
+  (async ()=>{
+    setPhase(Phase.SEATS);
 
-  // ✅ 실패 모달 중복 방지 리셋
-  app.seatFailShown = false;
+    app.seatFailShown = false;
 
-  app.seatEdit = false;
-  $("#saveSeatsBtn").style.display = "none";
-  $("#resetSeatsBtn").style.display = "none";
-  $("#snapBuildBtn").style.display = "none";
-  $("#zoomResetBtn").style.display = "none";
-  $("#editSeatsBtn").textContent = "좌석설정";
-  updateSeatLockUI();
+    app.seatEdit = false;
+    $("#saveSeatsBtn").style.display = "none";
+    $("#resetSeatsBtn").style.display = "none";
+    $("#snapBuildBtn").style.display = "none";
+    $("#zoomResetBtn").style.display = "none";
 
-  resetView();
+    $("#exportSeatsBtn").style.display = "none";
+    $("#importSeatsBtn").style.display = "none";
 
-  app.seatPoints = loadSeatPoints();
+    $("#editSeatsBtn").textContent = "좌석설정";
+    updateSeatLockUI();
 
-  let size;
-  if(app.selectedTheater === "big") size = "4px";
-  else if(app.selectedTheater === "mid") size = "7px";
-  else size = "10px";
-  document.documentElement.style.setProperty('--dotSize', size);
+    resetView();
 
-  app.seatsShownAt = performance.now();
-  app.seatsSuccessAt = null;
+    // ✅ 여기서 자동 로드 보장
+    await ensureSeatPointsLoaded();
 
-  $("#seatTitle").textContent = "자리 잡기";
-  $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
+    let size;
+    if(app.selectedTheater === "big") size = "4px";
+    else if(app.selectedTheater === "mid") size = "7px";
+    else size = "10px";
+    document.documentElement.style.setProperty('--dotSize', size);
 
-  const vp = $("#seatViewport");
-  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
-  Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
+    app.seatsShownAt = performance.now();
+    app.seatsSuccessAt = null;
 
-  if(app.seatPoints.length === 0){
-    stopGrapeDisappear();
-    app.grapes = [];
-    $("#seatHeaderText").textContent = "* 아직 좌석이 없어! ‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
-    $("#remainCount").textContent = "0";
-    return;
-  }
+    $("#seatTitle").textContent = "자리 잡기";
+    $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
 
-  app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
+    const vp = $("#seatViewport");
+    Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+    Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
 
-  const remainTarget = targetRemainByDifficulty();
-  applyInitialRemainFixed(app.grapes, remainTarget);
+    if(!app.seatPoints || app.seatPoints.length === 0){
+      stopGrapeDisappear();
+      app.grapes = [];
+      $("#seatHeaderText").textContent = "* 아직 좌석이 없어! (기본 좌석 불러오기를 실패했을 수도 있어)\n‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
+      $("#remainCount").textContent = "0";
+      return;
+    }
 
-  $("#seatHeaderText").textContent = "";
+    app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
 
-  renderGrapes();
-  startGrapeDisappear();
+    const remainTarget = targetRemainByDifficulty();
+    applyInitialRemainFixed(app.grapes, remainTarget);
+
+    $("#seatHeaderText").textContent = "";
+
+    renderGrapes();
+    startGrapeDisappear();
+  })();
 }
 
 function renderGrapes(){
@@ -1744,7 +1834,6 @@ function renderGrapes(){
         ev.stopPropagation();
         if(app.seatEdit) return;
 
-        // ✅ 이선좌(이미 선택된 좌석) 처리: 실패/리셋 아님 → 팝업만 닫고 계속 시도
         if(Math.random() < app.settings.failRate){
           showMsg("이선좌입니다", "이미 선택된 좌석이에요.\n창을 닫고 다른 자리를 계속 시도하세요.", [
             { text:"닫기", kind:"primary", onClick: hideMsg }
@@ -1752,7 +1841,6 @@ function renderGrapes(){
           return;
         }
 
-        // ✅ 성공 처리
         g.alive = false;
         app.seatsSuccessAt = performance.now();
         stopGrapeDisappear();
@@ -1765,7 +1853,6 @@ function renderGrapes(){
 
   $("#remainCount").textContent = String(aliveCount);
 
-  // ✅ 남은 포도알이 0이 되면 자동 실패 처리(중복 방지)
   if(!app.seatEdit && aliveCount === 0 && !app.seatsSuccessAt && !app.seatFailShown){
     stopGrapeDisappear();
     showSeatFailModal("남은 포도알이 모두 사라졌습니다.\n(다른 사람이 먼저 다 가져갔대…)");
@@ -1811,7 +1898,7 @@ function removeTwoGrapes(){
 }
 
 /***************
- * ✅ 실패 모달 (성공과 동일한 3가지 선택지 제공)
+ * ✅ 실패 모달
  ***************/
 function showSeatFailModal(reasonText){
   if(app.seatFailShown) return;
@@ -1829,32 +1916,9 @@ function showSeatFailModal(reasonText){
   lines.push("다시 시도하시겠습니까?");
 
   showMsg("실패!", lines.join("\n"), [
-    {
-      text:"처음으로",
-      kind:"primary",
-      onClick: ()=>{
-        hideMsg();
-        resetToTheater();
-      }
-    },
-    {
-      text:"보안문자부터",
-      kind:"",
-      onClick: ()=>{
-        hideMsg();
-        stopGrapeDisappear();
-        enterCaptcha();
-      }
-    },
-    {
-      text:"자리 잡기만 다시 하기",
-      kind:"",
-      onClick: ()=>{
-        hideMsg();
-        stopGrapeDisappear();
-        enterSeats(true);
-      }
-    }
+    { text:"처음으로", kind:"primary", onClick: ()=>{ hideMsg(); resetToTheater(); } },
+    { text:"보안문자부터", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterCaptcha(); } },
+    { text:"자리 잡기만 다시 하기", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterSeats(true); } }
   ]);
 }
 
@@ -1879,32 +1943,9 @@ function showSuccessModal(){
   $("#successAds").style.display = "block";
 
   showMsg("성공!", lines.join("\n"), [
-    {
-      text:"처음으로",
-      kind:"primary",
-      onClick: ()=>{
-        hideMsg();
-        resetToTheater();
-      }
-    },
-    {
-      text:"보안문자부터 다시 하기",
-      kind:"",
-      onClick: ()=>{
-        hideMsg();
-        stopGrapeDisappear();
-        enterCaptcha();
-      }
-    },
-    {
-      text:"포도알 다시",
-      kind:"",
-      onClick: ()=>{
-        hideMsg();
-        stopGrapeDisappear();
-        enterSeats(true);
-      }
-    }
+    { text:"처음으로", kind:"primary", onClick: ()=>{ hideMsg(); resetToTheater(); } },
+    { text:"보안문자부터 다시 하기", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterCaptcha(); } },
+    { text:"포도알 다시", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterSeats(true); } }
   ]);
 }
 
@@ -1938,14 +1979,19 @@ function hideMsg(){
   const ta = $("#transferArea");
   if(ta) ta.value = "";
 }
+
 /***********************
  * ✅ 좌석 내보내기/가져오기
  ***********************/
 function getTransferPayload(){
   const { seatKey, snapKey } = getSeatMapInfo();
 
-  const seatRaw = JSON.stringify(app.seatPoints && app.seatPoints.length ? app.seatPoints : (JSON.parse(localStorage.getItem(seatKey) || "[]")));
-  const snapRaw = JSON.stringify(app.snapGuide && app.snapGuide.length ? app.snapGuide : (JSON.parse(localStorage.getItem(snapKey) || "[]")));
+  const seatRaw = JSON.stringify(
+    (app.seatPoints && app.seatPoints.length) ? app.seatPoints : (JSON.parse(localStorage.getItem(seatKey) || "[]"))
+  );
+  const snapRaw = JSON.stringify(
+    (app.snapGuide && app.snapGuide.length) ? app.snapGuide : (JSON.parse(localStorage.getItem(snapKey) || "[]"))
+  );
 
   const payload = {
     app: "CurtainCall",
@@ -2046,9 +2092,9 @@ function openImportModal(){
     { text:"닫기", kind:"", onClick: hideMsg }
   ]);
 }
+
 /***************
  * 리셋
- * ✅ 주의: localStorage(좌석 저장)는 절대 삭제 안 함.
  ***************/
 function resetToTheater(){
   stopCountdown();
@@ -2069,7 +2115,6 @@ function resetToTheater(){
 
   app.seatFailShown = false;
 
-  // ✅ 리셋하면 다시 잠금
   app.seatLocked = true;
 
   app.seatEdit = false;
@@ -2097,30 +2142,25 @@ function onBack(){
       if(app.settings.captcha==="off") setPhase(Phase.CAL);
       else setPhase(Phase.CAPTCHA);
       break;
-
     case Phase.CAPTCHA:
       setPhase(Phase.CAL);
       break;
-
     case Phase.CAL:
       setPhase(Phase.DETAIL);
       setMainButton("판매가 종료되었습니다.", false);
       openStartOverlay();
       break;
-
     case Phase.WAIT:
       stopWait();
       setPhase(Phase.DETAIL);
       setMainButton("판매가 종료되었습니다.", false);
       openStartOverlay();
       break;
-
     case Phase.READY:
     case Phase.COUNTDOWN:
     case Phase.DETAIL:
       resetToTheater();
       break;
-
     case Phase.THEATER:
     default:
       break;
@@ -2137,11 +2177,9 @@ function boot(){
   setPhase(Phase.THEATER);
   setMainButton("시작하기", false);
 
-  // ✅ 줌 UI 버튼 연결
   $("#zoomIn").addEventListener("click", ()=> zoomUISet(+0.15));
   $("#zoomOut").addEventListener("click", ()=> zoomUISet(-0.15));
 
-  // 극장 선택
   $all(".theaterCard").forEach(card=>{
     card.addEventListener("click", ()=>{
       $all(".theaterCard").forEach(x=>x.classList.remove("sel"));
@@ -2152,7 +2190,6 @@ function boot(){
     });
   });
 
-  // 하단 버튼
   $("#mainBtn").addEventListener("click", ()=>{
     if(app.phase === Phase.THEATER){
       if(!app.selectedTheater) return;
@@ -2168,7 +2205,6 @@ function boot(){
     }
   });
 
-  // start overlay
   $("#startCancel").addEventListener("click", closeStartOverlay);
   $("#startGo").addEventListener("click", ()=>{
     closeStartOverlay();
@@ -2176,7 +2212,6 @@ function boot(){
     startCountdown();
   });
 
-  // 난이도 버튼
   $all(".diffBtn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       app.settings.difficulty = btn.dataset.diff;
@@ -2186,17 +2221,15 @@ function boot(){
   });
   renderDiffUI();
 
-  // 캡차
   $("#capOk").addEventListener("click", onCaptchaOk);
   $("#capInput").addEventListener("keydown", (e)=>{
     if(e.key === "Enter") onCaptchaOk();
   });
 
-  // ← 버튼
   $("#navBack").addEventListener("click", onBack);
 
   // 🔒 좌석 편집 토글 (+ 비밀번호)
-  $("#editSeatsBtn").addEventListener("click", ()=>{
+  $("#editSeatsBtn").addEventListener("click", async ()=>{
     if(app.phase !== Phase.SEATS) return;
 
     if(app.seatEdit){
@@ -2215,21 +2248,19 @@ function boot(){
       alert("편집모드가 활성화되었습니다.");
     }
 
-    app.seatPoints = loadSeatPoints();
+    // 편집 모드에서도 기본 좌석 자동 로드 시도
+    await ensureSeatPointsLoaded();
+
     setSeatEditMode(true);
   });
 
-  // ✅ 좌석 내보내기/가져오기
   $("#exportSeatsBtn").addEventListener("click", openExportModal);
   $("#importSeatsBtn").addEventListener("click", openImportModal);
 
-  // 저장/초기화/스냅/줌리셋
   $("#saveSeatsBtn").addEventListener("click", ()=>{
     if(!app.seatEdit) return;
 
     saveSeatPoints();
-
-    // ✅ 저장하면 다시 잠금
     app.seatLocked = true;
 
     showMsg("저장 완료", `좌석 ${app.seatPoints.length}개 저장했어!\n(극장별로 따로 저장돼)\n저장 후 편집 잠금(🔒)도 다시 걸었어!`, [
@@ -2250,14 +2281,10 @@ function boot(){
     await buildSnapGuideFromImage();
   });
 
-  $("#zoomResetBtn").addEventListener("click", ()=>{
-    resetView();
-  });
+  $("#zoomResetBtn").addEventListener("click", ()=> resetView());
 
-  // 좌석 보드 클릭(편집에서 좌석 추가/삭제)
   $("#seatBoard").addEventListener("click", seatBoardClickToEdit);
 
-  // ✅ 휠 줌: 게임/편집 공용
   $("#seatBoard").addEventListener("wheel", (e)=>{
     e.preventDefault();
     const delta = e.deltaY;
@@ -2265,7 +2292,6 @@ function boot(){
     zoomAt(e.clientX, e.clientY, app.view.scale * factor);
   }, { passive:false });
 
-  // ✅ 드래그/핀치: 게임/편집 공용
   const board = $("#seatBoard");
   board.addEventListener("pointerdown", (e)=>{
     const isDot = !!(e.target && e.target.closest && e.target.closest(".seatDot"));
@@ -2339,7 +2365,6 @@ function boot(){
   board.addEventListener("pointercancel", endPointer);
   board.addEventListener("pointerleave", endPointer);
 
-  // 시작 모달 바깥 클릭 닫기
   $("#startOverlay").addEventListener("click", (e)=>{
     if(e.target === $("#startOverlay")) closeStartOverlay();
   });
