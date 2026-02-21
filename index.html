@@ -503,8 +503,27 @@
       font-variant-numeric: tabular-nums;
       font-size: 12px;
     }
-    .zoomUI.hidden{ display:none; }
-  </style>
+    .zoomUI.hidden{ display:none; } 
+/* ✅ 좌석 내보내기/가져오기용 텍스트 영역 */
+.transferArea{
+  width:100%;
+  min-height: 180px;
+  border-radius: 12px;
+  border:1px solid #e5e7eb;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height: 1.35;
+  outline:none;
+  resize: vertical;
+}
+.transferArea:focus{
+  border-color:#c4b5fd;
+  box-shadow:0 0 0 4px rgba(124,58,237,.12);
+}
+.transferArea.hidden{ display:none; }
+</style>
 </head>
 
 <body>
@@ -638,12 +657,17 @@
             </div>
 
             <div class="seatTopActions">
-              <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
-              <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
-              <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
-              <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
-              <button class="miniBtn secondary" id="zoomResetBtn" type="button" style="display:none;">줌 리셋</button>
-            </div>
+  <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
+
+  <!-- ✅ 좌석 내보내기/가져오기 (항상 표시) -->
+  <button class="miniBtn secondary" id="exportSeatsBtn" type="button">내보내기</button>
+  <button class="miniBtn secondary" id="importSeatsBtn" type="button">가져오기</button>
+
+  <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
+  <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
+  <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
+  <button class="miniBtn secondary" id="zoomResetBtn" type="button" style="display:none;">줌 리셋</button>
+</div>
           </div>
 
           <div class="seatCard">
@@ -701,27 +725,37 @@
     </div>
 
     <!-- 메시지 모달 -->
-    <div class="overlay" id="msgOverlay">
-      <div class="modal">
-        <div class="modalHeader" id="msgTitle">안내</div>
-        <div class="modalBody" id="msgBody">-</div>
+<div class="overlay" id="msgOverlay">
+  <div class="modal">
+    <div class="modalHeader" id="msgTitle">안내</div>
 
-        <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
-        <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
-          <div class="adBanner" id="adBannerTop">
-            (광고 자리) 성공 후 상단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
-          </div>
-          <div style="height:10px"></div>
-          <div class="adBanner" id="adBannerBottom">
-            (광고 자리) 성공 후 하단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
-          </div>
-        </div>
+    <div class="modalBody" id="msgBody">-</div>
 
-        <div class="modalActions" id="msgActions"></div>
+    <!-- ✅ 내보내기/가져오기 텍스트 영역 (필요할 때만 표시) -->
+    <div class="modalBody" id="transferBox" style="display:none; padding-top:0;">
+      <textarea id="transferArea" class="transferArea" spellcheck="false" placeholder="여기에 붙여넣기 / 여기서 복사하기"></textarea>
+      <div class="muted" style="margin-top:8px; font-weight:900; font-size:12px; line-height:1.4;">
+        • 내보내기: 이 칸의 내용을 그대로 복사해서 저장해둬<br/>
+        • 가져오기: 저장해둔 JSON을 여기에 붙여넣고 ‘가져오기 적용’ 누르면 끝
       </div>
     </div>
+
+    <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
+    <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
+      <div class="adBanner" id="adBannerTop">
+        (광고 자리) 성공 후 상단 배너
+        <small>여기에 배너 광고 코드 붙이면 됨</small>
+      </div>
+      <div style="height:10px"></div>
+      <div class="adBanner" id="adBannerBottom">
+        (광고 자리) 성공 후 하단 배너
+        <small>여기에 배너 광고 코드 붙이면 됨</small>
+      </div>
+    </div>
+
+    <div class="modalActions" id="msgActions"></div>
+  </div>
+</div>
 
     <!-- ✅ 좌석/포도알 줌 컨트롤 (게임/편집 공용) -->
     <div class="zoomUI hidden" id="zoomUI" aria-label="확대 축소 컨트롤">
@@ -1899,8 +1933,126 @@ function showMsg(title, body, actions){
 function hideMsg(){
   $("#msgOverlay").classList.remove("show");
   $("#successAds").style.display = "none";
+
+  // ✅ 전송(내보내기/가져오기) UI 닫기
+  const box = $("#transferBox");
+  if(box) box.style.display = "none";
+  const ta = $("#transferArea");
+  if(ta) ta.value = "";
+}
+/***********************
+ * ✅ 좌석 내보내기/가져오기
+ ***********************/
+function getTransferPayload(){
+  const { seatKey, snapKey } = getSeatMapInfo();
+
+  // 현재 메모리에 있는 값 우선, 없으면 localStorage에서 읽기
+  const seatRaw = JSON.stringify(app.seatPoints && app.seatPoints.length ? app.seatPoints : (JSON.parse(localStorage.getItem(seatKey) || "[]")));
+  const snapRaw = JSON.stringify(app.snapGuide && app.snapGuide.length ? app.snapGuide : (JSON.parse(localStorage.getItem(snapKey) || "[]")));
+
+  const payload = {
+    app: "CurtainCall",
+    type: "seat_transfer",
+    version: 1,
+    theater: app.selectedTheater || "big",
+    savedAt: new Date().toISOString(),
+    seatPoints: JSON.parse(seatRaw),
+    snapGuide: JSON.parse(snapRaw),
+  };
+  return payload;
 }
 
+async function copyToClipboard(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch{
+    return false;
+  }
+}
+
+function openExportModal(){
+  if(app.phase !== Phase.SEATS){
+    showMsg("안내", "좌석 화면에서만 사용할 수 있어.", [
+      { text:"확인", kind:"primary", onClick: hideMsg }
+    ]);
+    return;
+  }
+
+  const payload = getTransferPayload();
+  const text = JSON.stringify(payload);
+
+  $("#successAds").style.display = "none";
+  $("#transferBox").style.display = "block";
+  $("#transferArea").value = text;
+
+  // 일단 모달 열고, 복사 시도
+  showMsg("좌석 내보내기", "아래 JSON을 복사해서 저장해둬.\n(가능하면 자동으로 클립보드에도 복사해둘게)", [
+    {
+      text:"자동 복사",
+      kind:"primary",
+      onClick: async ()=>{
+        const ok = await copyToClipboard($("#transferArea").value);
+        if(ok) alert("클립보드에 복사했어!");
+        else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
+      }
+    },
+    { text:"닫기", kind:"", onClick: hideMsg }
+  ]);
+}
+
+function openImportModal(){
+  if(app.phase !== Phase.SEATS){
+    showMsg("안내", "좌석 화면에서만 사용할 수 있어.", [
+      { text:"확인", kind:"primary", onClick: hideMsg }
+    ]);
+    return;
+  }
+
+  $("#successAds").style.display = "none";
+  $("#transferBox").style.display = "block";
+  $("#transferArea").value = "";
+
+  showMsg("좌석 가져오기", "저장해둔 JSON을 아래 칸에 붙여넣고 ‘가져오기 적용’을 누르면 끝.", [
+    {
+      text:"가져오기 적용",
+      kind:"primary",
+      onClick: ()=>{
+        try{
+          const text = ($("#transferArea").value || "").trim();
+          if(!text) throw new Error("empty");
+
+          const obj = JSON.parse(text);
+          if(!obj || obj.type !== "seat_transfer" || !Array.isArray(obj.seatPoints)){
+            throw new Error("format");
+          }
+
+          // 현재 선택한 극장 키로 저장 (같은 극장 기준으로 복원)
+          const { seatKey, snapKey } = getSeatMapInfo();
+          localStorage.setItem(seatKey, JSON.stringify(obj.seatPoints));
+          localStorage.setItem(snapKey, JSON.stringify(Array.isArray(obj.snapGuide) ? obj.snapGuide : []));
+
+          // 메모리에도 반영
+          app.seatPoints = obj.seatPoints;
+          app.snapGuide = Array.isArray(obj.snapGuide) ? obj.snapGuide : [];
+
+          hideMsg();
+          // 좌석 화면 갱신
+          enterSeats(true);
+
+          showMsg("완료", `좌석 ${obj.seatPoints.length}개를 가져왔어!`, [
+            { text:"확인", kind:"primary", onClick: hideMsg }
+          ]);
+        }catch(e){
+          showMsg("오류", "가져오기에 실패했어.\nJSON이 맞는지(중간에 잘렸는지) 확인해줘.", [
+            { text:"확인", kind:"primary", onClick: hideMsg }
+          ]);
+        }
+      }
+    },
+    { text:"닫기", kind:"", onClick: hideMsg }
+  ]);
+}
 /***************
  * 리셋
  * ✅ 주의: localStorage(좌석 저장)는 절대 삭제 안 함.
@@ -2075,6 +2227,9 @@ function boot(){
     app.seatPoints = loadSeatPoints();
     setSeatEditMode(true);
   });
+  // ✅ 좌석 내보내기/가져오기
+  $("#exportSeatsBtn").addEventListener("click", openExportModal);
+  $("#importSeatsBtn").addEventListener("click", openImportModal);
 
   // 저장/초기화/스냅/줌리셋
   $("#saveSeatsBtn").addEventListener("click", ()=>{
