@@ -504,26 +504,27 @@
       font-size: 12px;
     }
     .zoomUI.hidden{ display:none; } 
-/* ✅ 좌석 내보내기/가져오기용 텍스트 영역 */
-.transferArea{
-  width:100%;
-  min-height: 180px;
-  border-radius: 12px;
-  border:1px solid #e5e7eb;
-  padding: 10px 12px;
-  font-size: 12px;
-  font-weight: 900;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  line-height: 1.35;
-  outline:none;
-  resize: vertical;
-}
-.transferArea:focus{
-  border-color:#c4b5fd;
-  box-shadow:0 0 0 4px rgba(124,58,237,.12);
-}
-.transferArea.hidden{ display:none; }
-</style>
+
+    /* ✅ 좌석 내보내기/가져오기용 텍스트 영역 */
+    .transferArea{
+      width:100%;
+      min-height: 180px;
+      border-radius: 12px;
+      border:1px solid #e5e7eb;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      line-height: 1.35;
+      outline:none;
+      resize: vertical;
+    }
+    .transferArea:focus{
+      border-color:#c4b5fd;
+      box-shadow:0 0 0 4px rgba(124,58,237,.12);
+    }
+    .transferArea.hidden{ display:none; }
+  </style>
 </head>
 
 <body>
@@ -724,37 +725,37 @@
     </div>
 
     <!-- 메시지 모달 -->
-<div class="overlay" id="msgOverlay">
-  <div class="modal">
-    <div class="modalHeader" id="msgTitle">안내</div>
+    <div class="overlay" id="msgOverlay">
+      <div class="modal">
+        <div class="modalHeader" id="msgTitle">안내</div>
 
-    <div class="modalBody" id="msgBody">-</div>
+        <div class="modalBody" id="msgBody">-</div>
 
-    <!-- ✅ 내보내기/가져오기 텍스트 영역 (필요할 때만 표시) -->
-    <div class="modalBody" id="transferBox" style="display:none; padding-top:0;">
-      <textarea id="transferArea" class="transferArea" spellcheck="false" placeholder="여기에 붙여넣기 / 여기서 복사하기"></textarea>
-      <div class="muted" style="margin-top:8px; font-weight:900; font-size:12px; line-height:1.4;">
-        • 내보내기: 이 칸의 내용을 그대로 복사해서 저장해둬<br/>
-        • 가져오기: 저장해둔 JSON을 여기에 붙여넣고 ‘가져오기 적용’ 누르면 끝
+        <!-- ✅ 내보내기/가져오기 텍스트 영역 (필요할 때만 표시) -->
+        <div class="modalBody" id="transferBox" style="display:none; padding-top:0;">
+          <textarea id="transferArea" class="transferArea" spellcheck="false" placeholder="여기에 붙여넣기 / 여기서 복사하기"></textarea>
+          <div class="muted" style="margin-top:8px; font-weight:900; font-size:12px; line-height:1.4;">
+            • 내보내기: 이 칸의 내용을 그대로 복사해서 저장해둬<br/>
+            • 가져오기: 저장해둔 JSON을 여기에 붙여넣고 ‘가져오기 적용’ 누르면 끝
+          </div>
+        </div>
+
+        <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
+        <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
+          <div class="adBanner" id="adBannerTop">
+            (광고 자리) 성공 후 상단 배너
+            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          </div>
+          <div style="height:10px"></div>
+          <div class="adBanner" id="adBannerBottom">
+            (광고 자리) 성공 후 하단 배너
+            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          </div>
+        </div>
+
+        <div class="modalActions" id="msgActions"></div>
       </div>
     </div>
-
-    <!-- ✅ 성공 모달 내 배너 슬롯 (필요할 때만 보여줌) -->
-    <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
-      <div class="adBanner" id="adBannerTop">
-        (광고 자리) 성공 후 상단 배너
-        <small>여기에 배너 광고 코드 붙이면 됨</small>
-      </div>
-      <div style="height:10px"></div>
-      <div class="adBanner" id="adBannerBottom">
-        (광고 자리) 성공 후 하단 배너
-        <small>여기에 배너 광고 코드 붙이면 됨</small>
-      </div>
-    </div>
-
-    <div class="modalActions" id="msgActions"></div>
-  </div>
-</div>
 
     <!-- ✅ 좌석/포도알 줌 컨트롤 (게임/편집 공용) -->
     <div class="zoomUI hidden" id="zoomUI" aria-label="확대 축소 컨트롤">
@@ -824,8 +825,6 @@ function incStarts(){
   renderCounters();
 }
 function renderCounters(){
-  // 누적 사용자는 UI에서 안 쓰기로 했으니(요소가 없을 수 있음),
-  // 있으면 업데이트하고, 없으면 그냥 무시.
   const users = parseInt(localStorage.getItem(LS.users) || "0", 10) || 0;
   const starts = parseInt(localStorage.getItem(LS.starts) || "0", 10) || 0;
 
@@ -869,10 +868,11 @@ function diffKor(){
 }
 function diffHintText(){
   const d = app.settings.difficulty || "mid";
-  if(d === "high") return;
-  if(d === "mid")  return;
-  return;
-}function renderDiffUI(){
+  if(d === "high") return "상: 남은 좌석 적음 · 대기번호 빡셈 · 이선좌 확률 체감↑";
+  if(d === "mid")  return "중: 밸런스형 · 남은 좌석/대기번호/이선좌 확률 보통";
+  return "하: 남은 좌석 많음 · 대기번호 쉬움 · 이선좌 확률 체감↓";
+}
+function renderDiffUI(){
   const d = app.settings.difficulty || "mid";
   $all(".diffBtn").forEach(btn=>{
     btn.classList.toggle("sel", btn.dataset.diff === d);
@@ -1001,10 +1001,7 @@ function phaseLabel(p){
 function updateSeatLockUI(){
   const btn = $("#editSeatsBtn");
   if(!btn) return;
-
-  // 편집 중이면 "편집중"이 더 중요하니까 여기서 건드리지 않음
   if(app.seatEdit) return;
-
   btn.classList.toggle("locked", app.seatLocked);
 }
 
@@ -1564,7 +1561,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(ok) picked.push(c); // ✅ 버그 수정
+    if(오케이) picked.push(c); // ✅ 버그 수정 (오케이 → ok)
   }
 
   const guide = [];
@@ -1721,7 +1718,7 @@ function enterSeats(resetAlive){
   app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
 
   const remainTarget = targetRemainByDifficulty();
-  const { remainTarget: actualRemain, soldOutCount } = applyInitialRemainFixed(app.grapes, remainTarget);
+  applyInitialRemainFixed(app.grapes, remainTarget);
 
   $("#seatHeaderText").textContent = "";
 
@@ -1743,7 +1740,7 @@ function renderGrapes(){
 
     if(g.alive){
       aliveCount++;
-            dot.addEventListener("click", (ev)=>{
+      dot.addEventListener("click", (ev)=>{
         ev.stopPropagation();
         if(app.seatEdit) return;
 
@@ -1752,7 +1749,7 @@ function renderGrapes(){
           showMsg("이선좌입니다", "이미 선택된 좌석이에요.\n창을 닫고 다른 자리를 계속 시도하세요.", [
             { text:"닫기", kind:"primary", onClick: hideMsg }
           ]);
-          return; // ✅ 상태 변화 없음 (g.alive 그대로, 타이머도 그대로)
+          return;
         }
 
         // ✅ 성공 처리
@@ -1820,14 +1817,18 @@ function showSeatFailModal(reasonText){
   if(app.seatFailShown) return;
   app.seatFailShown = true;
 
-  // (선택) 지금까지 걸린 시간도 같이 보고 싶으면 여기에 표시 가능
   $("#successAds").style.display = "none";
 
   const lines = [];
-lines.push("좌석이 모두 소진되었습니다.");
-lines.push("");
-lines.push("다시 시도하시겠습니까?");
-showMsg("실패!", lines.join("\n"), [
+  lines.push("좌석이 모두 소진되었습니다.");
+  if(reasonText){
+    lines.push("");
+    lines.push(reasonText);
+  }
+  lines.push("");
+  lines.push("다시 시도하시겠습니까?");
+
+  showMsg("실패!", lines.join("\n"), [
     {
       text:"처음으로",
       kind:"primary",
@@ -1870,7 +1871,6 @@ function showSuccessModal(){
   lines.push("좌석 선택에 성공했습니다!");
   lines.push("");
   lines.push("기록");
-  // ✅ 총 시간(예매하기 클릭 ~ 포도알 성공) 추가
   lines.push(`- 총 시간(예매→포도알 성공): ${totalMs===null ? "-" : fmtSec(totalMs)}초`);
   lines.push(`- 예매하기 클릭: ${bookMs===null ? "-" : fmtSec(bookMs)}초`);
   lines.push(`- 보안문자 입력: ${capMs===null ? "-" : fmtSec(capMs)}초`);
@@ -1933,7 +1933,6 @@ function hideMsg(){
   $("#msgOverlay").classList.remove("show");
   $("#successAds").style.display = "none";
 
-  // ✅ 전송(내보내기/가져오기) UI 닫기
   const box = $("#transferBox");
   if(box) box.style.display = "none";
   const ta = $("#transferArea");
@@ -1945,7 +1944,6 @@ function hideMsg(){
 function getTransferPayload(){
   const { seatKey, snapKey } = getSeatMapInfo();
 
-  // 현재 메모리에 있는 값 우선, 없으면 localStorage에서 읽기
   const seatRaw = JSON.stringify(app.seatPoints && app.seatPoints.length ? app.seatPoints : (JSON.parse(localStorage.getItem(seatKey) || "[]")));
   const snapRaw = JSON.stringify(app.snapGuide && app.snapGuide.length ? app.snapGuide : (JSON.parse(localStorage.getItem(snapKey) || "[]")));
 
@@ -1985,14 +1983,13 @@ function openExportModal(){
   $("#transferBox").style.display = "block";
   $("#transferArea").value = text;
 
-  // 일단 모달 열고, 복사 시도
   showMsg("좌석 내보내기", "아래 JSON을 복사해서 저장해둬.\n(가능하면 자동으로 클립보드에도 복사해둘게)", [
     {
       text:"자동 복사",
       kind:"primary",
       onClick: async ()=>{
         const ok = await copyToClipboard($("#transferArea").value);
-        if(ok) alert("클립보드에 복사했어!");
+        if(오케이) alert("클립보드에 복사했어!");
         else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
       }
     },
@@ -2026,17 +2023,14 @@ function openImportModal(){
             throw new Error("format");
           }
 
-          // 현재 선택한 극장 키로 저장 (같은 극장 기준으로 복원)
           const { seatKey, snapKey } = getSeatMapInfo();
           localStorage.setItem(seatKey, JSON.stringify(obj.seatPoints));
           localStorage.setItem(snapKey, JSON.stringify(Array.isArray(obj.snapGuide) ? obj.snapGuide : []));
 
-          // 메모리에도 반영
           app.seatPoints = obj.seatPoints;
           app.snapGuide = Array.isArray(obj.snapGuide) ? obj.snapGuide : [];
 
           hideMsg();
-          // 좌석 화면 갱신
           enterSeats(true);
 
           showMsg("완료", `좌석 ${obj.seatPoints.length}개를 가져왔어!`, [
@@ -2205,13 +2199,11 @@ function boot(){
   $("#editSeatsBtn").addEventListener("click", ()=>{
     if(app.phase !== Phase.SEATS) return;
 
-    // 이미 편집중이면 바로 종료
     if(app.seatEdit){
       setSeatEditMode(false);
       return;
     }
 
-    // 잠겨있으면 비번 요구
     if(app.seatLocked){
       const pw = prompt("좌석 편집 비밀번호를 입력하세요");
       if(pw !== ADMIN_PW){
@@ -2226,6 +2218,7 @@ function boot(){
     app.seatPoints = loadSeatPoints();
     setSeatEditMode(true);
   });
+
   // ✅ 좌석 내보내기/가져오기
   $("#exportSeatsBtn").addEventListener("click", openExportModal);
   $("#importSeatsBtn").addEventListener("click", openImportModal);
@@ -2272,15 +2265,12 @@ function boot(){
     zoomAt(e.clientX, e.clientY, app.view.scale * factor);
   }, { passive:false });
 
-   // ✅ 드래그/핀치: 게임/편집 공용
+  // ✅ 드래그/핀치: 게임/편집 공용
   const board = $("#seatBoard");
   board.addEventListener("pointerdown", (e)=>{
-    // ✅ 포도알(좌석 점)을 누른 경우:
-    // 게임 모드에서는 클릭이 우선이라 캡처/드래그를 시작하지 않음.
-    // (편집 모드에서는 점 위 클릭도 편집 로직이 있을 수 있으니, 편집중이면 그대로 진행)
     const isDot = !!(e.target && e.target.closest && e.target.closest(".seatDot"));
     if(isDot && !app.seatEdit){
-      return; // 캡처하지 않음 → dot의 click이 정상 동작
+      return;
     }
 
     board.setPointerCapture(e.pointerId);
@@ -2295,10 +2285,10 @@ function boot(){
       const pts = Array.from(board._pointers.values());
       const dx = pts[0].x - pts[1].x;
       const dy = pts[0].y - pts[1].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      const dist2 = Math.sqrt(dx*dx + dy*dy);
       const midX = (pts[0].x + pts[1].x)/2;
       const midY = (pts[0].y + pts[1].y)/2;
-      app.view.pinch = {dist, midX, midY, scale:app.view.scale, tx:app.view.tx, ty:app.view.ty};
+      app.view.pinch = {dist:dist2, midX, midY, scale:app.view.scale, tx:app.view.tx, ty:app.view.ty};
       app.view.dragging = false;
     }
   });
@@ -2312,11 +2302,11 @@ function boot(){
       const pts = Array.from(board._pointers.values());
       const dx = pts[0].x - pts[1].x;
       const dy = pts[0].y - pts[1].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      const dist2 = Math.sqrt(dx*dx + dy*dy);
       const midX = (pts[0].x + pts[1].x)/2;
       const midY = (pts[0].y + pts[1].y)/2;
 
-      const ratio = dist / (app.view.pinch.dist || dist);
+      const ratio = dist2 / (app.view.pinch.dist || dist2);
       const nextScale = app.view.pinch.scale * ratio;
 
       zoomAt(midX, midY, nextScale);
