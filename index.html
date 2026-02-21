@@ -101,7 +101,29 @@
       font-weight:800;
     }
 
-    /* 하단 고정 버튼 */
+    .contactHint{
+      font-size:12px;
+      font-weight:900;
+      color:#9ca3af;
+      letter-spacing:-.2px;
+      filter: blur(.0px);
+      opacity:.9;
+      white-space:nowrap;
+    }
+
+    .topAdWrap{
+      padding:10px 16px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .topAdWrap .kakao_ad_area{
+      display:block !important;
+      min-height:50px;
+    }
+
     .bottom{
       position:absolute;
       left:0; right:0; bottom:0;
@@ -123,7 +145,6 @@
     }
     .primaryBtn.ready{ background: var(--btn); cursor:pointer; }
 
-    /* ✅ 광고 컨테이너 (예매 시작 전 팝업 영역) */
     .adSlot{
       margin: 12px 16px 0;
       border: 1px dashed #c7cbd1;
@@ -134,11 +155,13 @@
       font-weight: 900;
       font-size: 13px;
       line-height: 1.4;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
     .adSlot small{display:block; font-weight:800; color:#94a3b8; margin-top:6px;}
     .adSlot.hidden{ display:none; }
 
-    /* ✅ 성공 후 배너 광고 슬롯 */
     .adBanner{
       border: 1px dashed #c7cbd1;
       background: #f8fafc;
@@ -148,10 +171,11 @@
       font-weight: 900;
       font-size: 12px;
       line-height: 1.35;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
-    .adBanner small{display:block; font-weight:800; color:#94a3b8; margin-top:4px;}
 
-    /* 모달 */
     .overlay{
       position:absolute;
       inset:0;
@@ -201,11 +225,9 @@
       border-color:#111827;
     }
 
-    /* 화면 전환 */
     .screen{display:none;}
     .screen.show{display:block;}
 
-    /* 극장 선택 */
     .pad{padding:16px}
     .h2{
       font-weight:1000;
@@ -237,7 +259,6 @@
       backdrop-filter: blur(6px);
     }
 
-    /* 예매 상세 */
     .hero{height:210px;background:#111827;position:relative;overflow:hidden;}
     .hero img{width:100%;height:100%;object-fit:cover;display:block;}
     .hero .dim{position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(0,0,0,.15), rgba(0,0,0,.55)); pointer-events:none;}
@@ -255,7 +276,6 @@
     .value{flex:1}
     .muted{color:var(--muted)}
 
-    /* 대기 */
     .waitCard{margin:14px 16px;border-radius:18px;border:1px solid var(--line);overflow:hidden;background:#fff;}
     .waitTop{padding:18px 16px 12px;border-bottom:1px solid var(--line);}
     .waitTop .msg1{font-weight:1000;font-size:18px;}
@@ -269,7 +289,6 @@
     .waitStats{display:flex;justify-content:space-between;margin-top:10px;color:#111827;font-weight:1000;}
     .waitStats span{color:var(--muted);font-weight:900;margin-right:8px;}
 
-    /* 달력 */
     .calWrap{padding:14px 16px 8px;}
     .calTitle{font-weight:1000;font-size:28px;text-align:center;margin:10px 0 12px;font-variant-numeric: tabular-nums;letter-spacing:-.4px;}
     .dow{display:grid;grid-template-columns: repeat(7, 1fr);gap:6px;padding:0 4px 10px;color:var(--muted);font-weight:1000;text-align:center;}
@@ -278,7 +297,6 @@
     .day.off{opacity:.35; cursor:default;}
     .day.sel{background: var(--accent);color:#fff;border-color: var(--accent);transform: scale(1.02);}
 
-    /* 캡차 */
     .capWrap{padding:14px 16px}
     .capCard{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff;}
     .capTitle{font-weight:1000;font-size:18px;margin-bottom:10px;}
@@ -317,7 +335,6 @@
       100%{transform:translateX(0)}
     }
 
-    /* 좌석(포도알) */
     .seatWrap{padding:14px 16px 18px}
     .seatTop{
       display:flex;
@@ -353,7 +370,6 @@
       color:#111827;
     }
 
-    /* 🔒 잠김 상태 버튼 느낌 */
     .miniBtn.locked{
       background:#111827;
       position:relative;
@@ -379,7 +395,6 @@
       touch-action:none;
     }
 
-    /* 줌/드래그용 뷰포트 */
     .seatViewport{
       position:absolute;
       inset:0;
@@ -387,7 +402,6 @@
       will-change: transform;
     }
 
-    /* 좌석 배치도 이미지 */
     #seatMapImg{
       position:absolute;
       inset:0;
@@ -399,7 +413,6 @@
       -webkit-user-drag:none;
     }
 
-    /* 좌석 점(포도알) */
     .seatDot{
       position:absolute;
       width: var(--dotSize, 10px);
@@ -425,7 +438,6 @@
     }
     .seatDot.edit{ cursor:crosshair; }
 
-    /* 스냅 가이드 */
     .snapGuide{
       position:absolute;
       width:10px;height:10px;
@@ -443,7 +455,6 @@
     .seatFooter .left{color:var(--muted);font-weight:1000;}
     .seatFooter .right{font-variant-numeric:tabular-nums;}
 
-    /* ✅ 난이도 선택 UI */
     .diffRow{
       display:flex;
       gap:10px;
@@ -470,7 +481,6 @@
       margin-bottom: 2px;
     }
 
-    /* ✅ 포도알/좌석 줌 UI (게임/편집 모두 사용) */
     .zoomUI{
       position: fixed;
       right: 14px;
@@ -505,7 +515,6 @@
     }
     .zoomUI.hidden{ display:none; }
 
-    /* ✅ 좌석 내보내기/가져오기용 텍스트 영역 */
     .transferArea{
       width:100%;
       min-height: 180px;
@@ -539,10 +548,17 @@
       <div class="counters">
         <span class="chip">누적 시작 <b id="uStarts">0</b></span>
         <span class="spacer"></span>
-        <span class="mini" id="phaseText">-</span>
+        <span class="contactHint">문의: histy.project@gmail.com</span>
       </div>
 
-      <!-- 화면 0: 극장 선택 -->
+      <div class="topAdWrap" id="topAdWrap">
+        <ins class="kakao_ad_area"
+             style="display:none;"
+             data-ad-unit="DAN-vmfnJX3JCxlk6Kua"
+             data-ad-width="320"
+             data-ad-height="50"></ins>
+      </div>
+
       <div class="screen show" id="scrTheater">
         <div class="pad">
           <div class="h2">극장을 선택하세요</div>
@@ -569,7 +585,6 @@
         </div>
       </div>
 
-      <!-- 화면 1: 예매 상세 -->
       <div class="screen" id="scrDetail">
         <div class="hero">
           <img src="poster.png" alt="포스터" />
@@ -589,14 +604,15 @@
 
         <div class="section muted" style="font-weight:900;"></div>
 
-        <!-- ✅ "시작하기 누르기 전" 팝업 광고 자리 -->
         <div class="adSlot" id="adPreStart">
-          📌 (광고 자리) 시작 전 팝업/전면 광고 컨테이너<br/>
-          <small>여기에 AdSense/Adfit 코드(또는 커스텀 팝업)를 넣으면 됨. 시뮬 시작 후에는 자동 숨김.</small>
+          <ins class="kakao_ad_area"
+               style="display:none;"
+               data-ad-unit="DAN-zye8qTzAxnhStzMp"
+               data-ad-width="320"
+               data-ad-height="100"></ins>
         </div>
       </div>
 
-      <!-- 화면 2: 대기순서 -->
       <div class="screen" id="scrWait">
         <div class="waitCard">
           <div class="waitTop">
@@ -619,7 +635,6 @@
         </div>
       </div>
 
-      <!-- 화면 3: 달력 -->
       <div class="screen" id="scrCal">
         <div class="calWrap">
           <div class="calTitle" id="calYM">2026.03</div>
@@ -633,7 +648,6 @@
         </div>
       </div>
 
-      <!-- 화면 4: 보안문자 -->
       <div class="screen" id="scrCaptcha">
         <div class="capWrap">
           <div class="capCard" id="capCard">
@@ -648,7 +662,6 @@
         </div>
       </div>
 
-      <!-- 화면 5: 포도알(좌석) -->
       <div class="screen" id="scrSeats">
         <div class="seatWrap">
           <div class="seatTop">
@@ -689,12 +702,10 @@
       </div>
     </div>
 
-    <!-- 하단 버튼 -->
     <div class="bottom" id="bottomBar">
       <button class="primaryBtn" id="mainBtn" disabled>시작하기</button>
     </div>
 
-    <!-- 예매 시작 모달 -->
     <div class="overlay" id="startOverlay">
       <div class="modal">
         <div class="modalHeader">연습 시작</div>
@@ -722,7 +733,6 @@
       </div>
     </div>
 
-    <!-- 메시지 모달 -->
     <div class="overlay" id="msgOverlay">
       <div class="modal">
         <div class="modalHeader" id="msgTitle">안내</div>
@@ -738,14 +748,12 @@
         </div>
 
         <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
-          <div class="adBanner" id="adBannerTop">
-            (광고 자리) 성공 후 상단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
-          </div>
-          <div style="height:10px"></div>
-          <div class="adBanner" id="adBannerBottom">
-            (광고 자리) 성공 후 하단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          <div class="adBanner" id="adBannerOnly">
+            <ins class="kakao_ad_area"
+                 style="display:none;"
+                 data-ad-unit="DAN-RmMZ6WRdNMwUPhZA"
+                 data-ad-width="320"
+                 data-ad-height="100"></ins>
           </div>
         </div>
 
@@ -753,7 +761,6 @@
       </div>
     </div>
 
-    <!-- ✅ 좌석/포도알 줌 컨트롤 (게임/편집 공용) -->
     <div class="zoomUI hidden" id="zoomUI" aria-label="확대 축소 컨트롤">
       <button id="zoomOut" type="button" aria-label="축소">-</button>
       <span id="zoomLabel">100%</span>
@@ -763,18 +770,6 @@
   </div>
 
 <script>
-/***************
- * ✅ 기본 좌석 JSON URL (big/mid/small)
- ***************/
-const SEAT_JSON_URLS = {
-  big:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/big.json",
-  mid:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/mid.json",
-  small: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/small.json",
-};
-
-/***************
- * 헬퍼
- ***************/
 function $(sel){ return document.querySelector(sel); }
 function $all(sel){ return Array.from(document.querySelectorAll(sel)); }
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -793,9 +788,6 @@ function fmtSec(ms){
   return s.toFixed(2);
 }
 
-/***************
- * 로컬 카운터
- ***************/
 const LS = {
   uid: "curtaincall_uid",
   users: "curtaincall_users_local",
@@ -835,9 +827,6 @@ function renderCounters(){
   if(uStarts) uStarts.textContent = starts.toLocaleString();
 }
 
-/***************
- * 설정
- ***************/
 function loadSettings(){
   const raw = localStorage.getItem(LS.settings);
   const base = { captcha:"on", countdownSec:10, failRate:0.50, difficulty:"mid" };
@@ -858,9 +847,6 @@ function saveSettings(s){
   localStorage.setItem(LS.settings, JSON.stringify(s));
 }
 
-/***************
- * 난이도
- ***************/
 function diffKor(){
   const d = app.settings.difficulty || "mid";
   if(d === "high") return "상";
@@ -904,18 +890,12 @@ function applyInitialRemainFixed(grapes, remainTarget){
   return { remainTarget, soldOutCount: total - remainTarget };
 }
 
-/***************
- * ✅ 광고 컨테이너 표시 제어
- ***************/
 function setPreStartAdVisible(visible){
   const el = $("#adPreStart");
   if(!el) return;
   el.classList.toggle("hidden", !visible);
 }
 
-/***************
- * 상태
- ***************/
 const Phase = Object.freeze({
   THEATER:"THEATER",
   DETAIL:"DETAIL",
@@ -927,9 +907,6 @@ const Phase = Object.freeze({
   SEATS:"SEATS",
 });
 
-/***************
- * ✅ 좌석 편집 잠금 비번
- ***************/
 const ADMIN_PW = "jolver48@@";
 
 const app = {
@@ -964,9 +941,6 @@ const app = {
   snapGuide: [],
   snapKey: null,
 
-  // ✅ 기본 좌석 로드 중 중복 fetch 방지
-  preload: { promise: null },
-
   view: {
     scale: 1,
     tx: 0,
@@ -991,9 +965,6 @@ function phaseLabel(p){
   }
 }
 
-/***************
- * ✅ 잠금 버튼 UI 업데이트
- ***************/
 function updateSeatLockUI(){
   const btn = $("#editSeatsBtn");
   if(!btn) return;
@@ -1001,9 +972,6 @@ function updateSeatLockUI(){
   btn.classList.toggle("locked", app.seatLocked);
 }
 
-/***************
- * ✅ 줌 UI 표시/동작 (게임/편집 공용)
- ***************/
 function updateZoomUI(){
   const z = $("#zoomUI");
   if(!z) return;
@@ -1026,7 +994,8 @@ function zoomUISet(delta){
 
 function setPhase(p){
   app.phase = p;
-  $("#phaseText").textContent = phaseLabel(p);
+  // ✅ phaseText 요소가 없어서 에러나던 라인 제거
+
   showOnly(p);
 
   if(p===Phase.THEATER) $("#topTitle").textContent = "커튼콜 (CurtainCall)";
@@ -1066,9 +1035,6 @@ function showOnly(phase){
   $("#content").scrollTop = 0;
 }
 
-/***************
- * 하단 버튼
- ***************/
 function setMainButton(text, enabled){
   const btn = $("#mainBtn");
   btn.textContent = text;
@@ -1076,9 +1042,6 @@ function setMainButton(text, enabled){
   btn.classList.toggle("ready", !!enabled);
 }
 
-/***************
- * 극장 선택 → 상세 반영
- ***************/
 function applyTheaterToDetail(){
   const t = app.selectedTheater;
   const place =
@@ -1098,9 +1061,6 @@ function theaterName(t){
   return "-";
 }
 
-/***************
- * 좌석 이미지/저장키
- ***************/
 function getSeatMapInfo(){
   const t = app.selectedTheater || "big";
   const mapSrc =
@@ -1118,71 +1078,9 @@ function getSeatMapInfo(){
     t==="mid" ? LS.snapMid :
     LS.snapSmall;
 
-  const url = SEAT_JSON_URLS[t] || SEAT_JSON_URLS.big;
-
-  return { mapSrc, seatKey, snapKey, url };
+  return { mapSrc, seatKey, snapKey };
 }
 
-/***************
- * ✅ 기본 좌석 JSON을 받아서 localStorage에 저장 (처음 1회)
- * - 형식 지원:
- *   1) [ {x,y}, ... ]
- *   2) { seatPoints:[...], snapGuide:[...] } (export 형태)
- ***************/
-async function fetchDefaultSeatsIfNeeded(){
-  const { seatKey, snapKey, url } = getSeatMapInfo();
-
-  // 이미 로컬에 있으면 스킵
-  const existing = localStorage.getItem(seatKey);
-  if(existing){
-    try{
-      const arr = JSON.parse(existing);
-      if(Array.isArray(arr) && arr.length) return true;
-    }catch{}
-  }
-
-  try{
-    const res = await fetch(url, { cache: "no-store" });
-    if(!res.ok) throw new Error("http");
-    const txt = await res.text();
-    const data = JSON.parse(txt);
-
-    let seatPoints = [];
-    let snapGuide = [];
-
-    if(Array.isArray(data)){
-      seatPoints = data;
-    }else if(data && Array.isArray(data.seatPoints)){
-      seatPoints = data.seatPoints;
-      if(Array.isArray(data.snapGuide)) snapGuide = data.snapGuide;
-      // 혹시 field명이 seatpoints 같은 변형이면 확장 가능
-    }else if(data && Array.isArray(data.points)){
-      seatPoints = data.points;
-    }
-
-    // 좌표 형태 검증(대충)
-    seatPoints = seatPoints
-      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
-      .map(p => ({ x: p.x, y: p.y }));
-
-    snapGuide = (Array.isArray(snapGuide) ? snapGuide : [])
-      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
-      .map(p => ({ x: p.x, y: p.y }));
-
-    if(seatPoints.length){
-      localStorage.setItem(seatKey, JSON.stringify(seatPoints));
-      localStorage.setItem(snapKey, JSON.stringify(snapGuide));
-      return true;
-    }
-    return false;
-  }catch{
-    return false;
-  }
-}
-
-/***************
- * ✅ 좌석/스냅 로드
- ***************/
 function loadSeatPoints(){
   const { mapSrc, seatKey, snapKey } = getSeatMapInfo();
   app.seatKey = seatKey;
@@ -1220,39 +1118,6 @@ function saveSnapGuide(){
   localStorage.setItem(app.snapKey, JSON.stringify(app.snapGuide));
 }
 
-/***************
- * ✅ 좌석이 비어있으면 원격 JSON에서 자동 로드 후 다시 로드
- ***************/
-async function ensureSeatPointsLoaded(){
-  // 중복 호출 방지
-  if(app.preload.promise) return app.preload.promise;
-
-  app.preload.promise = (async ()=>{
-    // 1) 먼저 현재 로컬 로드
-    let pts = loadSeatPoints();
-    if(pts && pts.length){
-      app.seatPoints = pts;
-      return true;
-    }
-
-    // 2) 로컬에 없으면 기본 JSON fetch
-    const ok = await fetchDefaultSeatsIfNeeded();
-
-    // 3) 다시 로드
-    pts = loadSeatPoints();
-    app.seatPoints = pts;
-
-    return !!(ok && pts && pts.length);
-  })();
-
-  const result = await app.preload.promise;
-  app.preload.promise = null;
-  return result;
-}
-
-/***************
- * 예매 상세 흐름
- ***************/
 function openStartOverlay(){
   renderDiffUI();
   $("#startOverlay").classList.add("show");
@@ -1376,9 +1241,6 @@ function stopWait(){
   }
 }
 
-/***************
- * 달력
- ***************/
 function enterCalendar(){
   setPhase(Phase.CAL);
   app.pickedDate = null;
@@ -1415,9 +1277,6 @@ function buildCalendar(year, month, days){
   }
 }
 
-/***************
- * 보안문자
- ***************/
 function enterCaptcha(){
   setPhase(Phase.CAPTCHA);
   app.captchaShownAt = performance.now();
@@ -1455,9 +1314,6 @@ function onCaptchaOk(){
   }
 }
 
-/***************
- * ✅ 줌/드래그 유틸
- ***************/
 function applyViewTransform(){
   const vp = $("#seatViewport");
   const v = app.view;
@@ -1519,9 +1375,6 @@ function zoomAt(clientX, clientY, nextScale){
   updateZoomUI();
 }
 
-/***************
- * ✅ 스냅
- ***************/
 function dist(a,b){
   const dx = a.x-b.x, dy=a.y-b.y;
   return Math.sqrt(dx*dx+dy*dy);
@@ -1557,9 +1410,6 @@ function renderSnapGuide(){
   }
 }
 
-/**
- * 스냅 가이드 생성 (간이 원형 감지)
- */
 async function buildSnapGuideFromImage(){
   const img = $("#seatMapImg");
   if(!img || !img.complete){
@@ -1641,7 +1491,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(오케이) picked.push(c);
+    if(오케이) picked.push(c); // ✅ 오타 수정
   }
 
   const guide = [];
@@ -1666,9 +1516,6 @@ async function buildSnapGuideFromImage(){
   ]);
 }
 
-/***************
- * ✅ 좌석 편집 모드
- ***************/
 function setSeatEditMode(on){
   app.seatEdit = on;
 
@@ -1753,67 +1600,60 @@ function renderSeatDotsForEdit(){
   renderSnapGuide();
 }
 
-/***************
- * ✅ 포도알(좌석) 게임
- ***************/
 function enterSeats(resetAlive){
-  // async가 필요해서 내부에서 실행
-  (async ()=>{
-    setPhase(Phase.SEATS);
+  setPhase(Phase.SEATS);
 
-    app.seatFailShown = false;
+  app.seatFailShown = false;
 
-    app.seatEdit = false;
-    $("#saveSeatsBtn").style.display = "none";
-    $("#resetSeatsBtn").style.display = "none";
-    $("#snapBuildBtn").style.display = "none";
-    $("#zoomResetBtn").style.display = "none";
+  app.seatEdit = false;
+  $("#saveSeatsBtn").style.display = "none";
+  $("#resetSeatsBtn").style.display = "none";
+  $("#snapBuildBtn").style.display = "none";
+  $("#zoomResetBtn").style.display = "none";
 
-    $("#exportSeatsBtn").style.display = "none";
-    $("#importSeatsBtn").style.display = "none";
+  $("#exportSeatsBtn").style.display = "none";
+  $("#importSeatsBtn").style.display = "none";
 
-    $("#editSeatsBtn").textContent = "좌석설정";
-    updateSeatLockUI();
+  $("#editSeatsBtn").textContent = "좌석설정";
+  updateSeatLockUI();
 
-    resetView();
+  resetView();
 
-    // ✅ 여기서 자동 로드 보장
-    await ensureSeatPointsLoaded();
+  app.seatPoints = loadSeatPoints();
 
-    let size;
-    if(app.selectedTheater === "big") size = "4px";
-    else if(app.selectedTheater === "mid") size = "7px";
-    else size = "10px";
-    document.documentElement.style.setProperty('--dotSize', size);
+  let size;
+  if(app.selectedTheater === "big") size = "4px";
+  else if(app.selectedTheater === "mid") size = "7px";
+  else size = "10px";
+  document.documentElement.style.setProperty('--dotSize', size);
 
-    app.seatsShownAt = performance.now();
-    app.seatsSuccessAt = null;
+  app.seatsShownAt = performance.now();
+  app.seatsSuccessAt = null;
 
-    $("#seatTitle").textContent = "자리 잡기";
-    $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
+  $("#seatTitle").textContent = "자리 잡기";
+  $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
 
-    const vp = $("#seatViewport");
-    Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
-    Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+  Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
 
-    if(!app.seatPoints || app.seatPoints.length === 0){
-      stopGrapeDisappear();
-      app.grapes = [];
-      $("#seatHeaderText").textContent = "* 아직 좌석이 없어! (기본 좌석 불러오기를 실패했을 수도 있어)\n‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
-      $("#remainCount").textContent = "0";
-      return;
-    }
+  if(app.seatPoints.length === 0){
+    stopGrapeDisappear();
+    app.grapes = [];
+    $("#seatHeaderText").textContent = "* 아직 좌석이 없어! ‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
+    $("#remainCount").textContent = "0";
+    return;
+  }
 
-    app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
+  app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
 
-    const remainTarget = targetRemainByDifficulty();
-    applyInitialRemainFixed(app.grapes, remainTarget);
+  const remainTarget = targetRemainByDifficulty();
+  applyInitialRemainFixed(app.grapes, remainTarget);
 
-    $("#seatHeaderText").textContent = "";
+  $("#seatHeaderText").textContent = "";
 
-    renderGrapes();
-    startGrapeDisappear();
-  })();
+  renderGrapes();
+  startGrapeDisappear();
 }
 
 function renderGrapes(){
@@ -1897,9 +1737,6 @@ function removeTwoGrapes(){
   renderGrapes();
 }
 
-/***************
- * ✅ 실패 모달
- ***************/
 function showSeatFailModal(reasonText){
   if(app.seatFailShown) return;
   app.seatFailShown = true;
@@ -1922,9 +1759,6 @@ function showSeatFailModal(reasonText){
   ]);
 }
 
-/***************
- * 성공 모달
- ***************/
 function showSuccessModal(){
   const totalMs = (app.seatsSuccessAt && app.bookClickedAt) ? (app.seatsSuccessAt - app.bookClickedAt) : null;
   const bookMs  = (app.bookClickedAt && app.readyAt) ? (app.bookClickedAt - app.readyAt) : null;
@@ -1949,9 +1783,6 @@ function showSuccessModal(){
   ]);
 }
 
-/***************
- * 메시지 모달
- ***************/
 function showMsg(title, body, actions){
   $("#msgTitle").textContent = title;
   $("#msgBody").textContent = body;
@@ -1980,9 +1811,6 @@ function hideMsg(){
   if(ta) ta.value = "";
 }
 
-/***********************
- * ✅ 좌석 내보내기/가져오기
- ***********************/
 function getTransferPayload(){
   const { seatKey, snapKey } = getSeatMapInfo();
 
@@ -2093,9 +1921,6 @@ function openImportModal(){
   ]);
 }
 
-/***************
- * 리셋
- ***************/
 function resetToTheater(){
   stopCountdown();
   stopWait();
@@ -2132,9 +1957,6 @@ function resetToTheater(){
   setMainButton("시작하기", false);
 }
 
-/***************
- * ← 이전으로
- ***************/
 function onBack(){
   switch(app.phase){
     case Phase.SEATS:
@@ -2167,9 +1989,6 @@ function onBack(){
   }
 }
 
-/***************
- * 부트
- ***************/
 function boot(){
   initCounters();
   saveSettings(app.settings);
@@ -2228,8 +2047,7 @@ function boot(){
 
   $("#navBack").addEventListener("click", onBack);
 
-  // 🔒 좌석 편집 토글 (+ 비밀번호)
-  $("#editSeatsBtn").addEventListener("click", async ()=>{
+  $("#editSeatsBtn").addEventListener("click", ()=>{
     if(app.phase !== Phase.SEATS) return;
 
     if(app.seatEdit){
@@ -2248,9 +2066,7 @@ function boot(){
       alert("편집모드가 활성화되었습니다.");
     }
 
-    // 편집 모드에서도 기본 좌석 자동 로드 시도
-    await ensureSeatPointsLoaded();
-
+    app.seatPoints = loadSeatPoints();
     setSeatEditMode(true);
   });
 
@@ -2372,5 +2188,8 @@ function boot(){
 
 boot();
 </script>
+
+<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
 </body>
 </html>
