@@ -657,17 +657,16 @@
             </div>
 
             <div class="seatTopActions">
-  <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
+              <!-- ✅ 사용자에게 아예 숨김 처리 -->
+              <button class="miniBtn locked" id="editSeatsBtn" type="button" style="display:none;">좌석설정</button>
+              <button class="miniBtn secondary" id="exportSeatsBtn" type="button" style="display:none;">내보내기</button>
+              <button class="miniBtn secondary" id="importSeatsBtn" type="button" style="display:none;">가져오기</button>
 
-  <!-- ✅ 좌석 내보내기/가져오기 (항상 표시) -->
-  <button class="miniBtn secondary" id="exportSeatsBtn" type="button">내보내기</button>
-  <button class="miniBtn secondary" id="importSeatsBtn" type="button">가져오기</button>
-
-  <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
-  <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
-  <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
-  <button class="miniBtn secondary" id="zoomResetBtn" type="button" style="display:none;">줌 리셋</button>
-</div>
+              <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
+              <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
+              <button class="miniBtn secondary" id="snapBuildBtn" type="button" style="display:none;">스냅 가이드 생성</button>
+              <button class="miniBtn secondary" id="zoomResetBtn" type="button" style="display:none;">줌 리셋</button>
+            </div>
           </div>
 
           <div class="seatCard">
