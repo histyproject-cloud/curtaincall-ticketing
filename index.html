@@ -517,7 +517,6 @@
 
     <div class="content" id="content">
       <div class="counters">
-        <span class="chip">누적 이용자 <b id="uUsers">0</b></span>
         <span class="chip">누적 시작 <b id="uStarts">0</b></span>
         <span class="spacer"></span>
         <span class="mini" id="phaseText">-</span>
@@ -527,7 +526,7 @@
       <div class="screen show" id="scrTheater">
         <div class="pad">
           <div class="h2">극장을 선택하세요</div>
-          <div class="sub">선택 후 하단 “시작하기”를 눌러 예매 페이지로 이동해요.</div>
+          <div class="sub">극장 선택 후 하단 “시작하기”를 눌러 예매 페이지로 이동하세요.</div>
 
           <div class="theaterList">
             <div class="theaterCard" data-theater="big">
@@ -609,7 +608,7 @@
           </div>
           <div class="grid" id="calGrid"></div>
           <div class="muted" style="padding:8px 4px 18px;font-weight:900;">
-            날짜를 누르면 다음 단계로 바로 넘어가요.
+            날짜를 누르면 다음 단계로 넘어갑니다.
           </div>
         </div>
       </div>
@@ -634,7 +633,7 @@
         <div class="seatWrap">
           <div class="seatTop">
             <div>
-              <div class="stTitle" id="seatTitle">포도알 잡기</div>
+              <div class="stTitle" id="seatTitle">자리 잡기</div>
               <div class="stSub" id="seatSub">남은 자리를 클릭하면 성공!</div>
             </div>
 
@@ -678,7 +677,7 @@
         <div class="modalHeader">연습 시작</div>
 
         <div class="modalBody">
-          “시작하기”를 누르면 하단 버튼 자리에서 카운트다운이 시작됩니다.
+          '시작하기'를 누르면 10초 카운트다운 후 '예매하기' 버튼이 활성화됩니다.
         </div>
 
         <!-- ✅ 난이도 선택 (시작하기 위) -->
@@ -792,12 +791,17 @@ function incStarts(){
   renderCounters();
 }
 function renderCounters(){
+  // 누적 사용자는 UI에서 안 쓰기로 했으니(요소가 없을 수 있음),
+  // 있으면 업데이트하고, 없으면 그냥 무시.
   const users = parseInt(localStorage.getItem(LS.users) || "0", 10) || 0;
   const starts = parseInt(localStorage.getItem(LS.starts) || "0", 10) || 0;
-  $("#uUsers").textContent = users.toLocaleString();
-  $("#uStarts").textContent = starts.toLocaleString();
-}
 
+  const uUsers = $("#uUsers");
+  if(uUsers) uUsers.textContent = users.toLocaleString();
+
+  const uStarts = $("#uStarts");
+  if(uStarts) uStarts.textContent = starts.toLocaleString();
+}
 /***************
  * 설정
  ***************/
@@ -832,11 +836,10 @@ function diffKor(){
 }
 function diffHintText(){
   const d = app.settings.difficulty || "mid";
-  if(d === "high") return "상: 대기번호 빡셈 · 남은 포도알 25개";
-  if(d === "mid")  return "중: 대기번호 중간 · 남은 포도알 40개";
-  return "하: 대기번호 쉬움 · 남은 포도알 100개";
-}
-function renderDiffUI(){
+  if(d === "high") return;
+  if(d === "mid")  return;
+  return;
+}function renderDiffUI(){
   const d = app.settings.difficulty || "mid";
   $all(".diffBtn").forEach(btn=>{
     btn.classList.toggle("sel", btn.dataset.diff === d);
@@ -911,6 +914,9 @@ const app = {
   seatsShownAt: null,
   seatsSuccessAt: null,
 
+  // ✅ 포도알 실패 모달 중복 방지
+  seatFailShown: false,
+
   // 진행
   countdownLeft: 10,
   countdownTimer: null,
@@ -967,7 +973,6 @@ function updateSeatLockUI(){
   if(app.seatEdit) return;
 
   btn.classList.toggle("locked", app.seatLocked);
-  // 텍스트는 그대로 "좌석설정", lock 아이콘은 ::after로 붙음
 }
 
 /***************
@@ -1003,7 +1008,7 @@ function setPhase(p){
   else if(p===Phase.WAIT) $("#topTitle").textContent = "예매 대기";
   else if(p===Phase.CAL) $("#topTitle").textContent = "날짜 선택";
   else if(p===Phase.CAPTCHA) $("#topTitle").textContent = "보안문자";
-  else if(p===Phase.SEATS) $("#topTitle").textContent = "포도알 잡기";
+  else if(p===Phase.SEATS) $("#topTitle").textContent = "자리 잡기";
 
   // ✅ 예매 시작 전(DETAIL)에서만 사전 광고 보이게
   setPreStartAdVisible(p === Phase.DETAIL);
@@ -1061,7 +1066,7 @@ function applyTheaterToDetail(){
 
   $("#detailPlace").textContent = `CurtainCall ${place}`;
   $("#detailTitle").textContent = `CurtainCall Musical (${place})`;
-  $("#detailBadge").textContent = "뮤지컬 · 가상";
+  $("#detailBadge").textContent = "뮤지컬";
 }
 
 function theaterName(t){
@@ -1372,7 +1377,7 @@ function clientToBoardPercent(clientX, clientY){
 function clampView(){
   const rect = boardRect();
   const v = app.view;
-  const minScale = 0.6;   // ✅ 게임에서도 축소 허용
+  const minScale = 0.6;
   const maxScale = 4;
   v.scale = clampNum(v.scale, minScale, maxScale);
 
@@ -1526,7 +1531,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(ok) picked.push(c);
+    if(ok) picked.push(c); // ✅ 버그 수정
   }
 
   const guide = [];
@@ -1572,7 +1577,6 @@ function setSeatEditMode(on){
     renderSnapGuide();
     renderSeatDotsForEdit();
   }else{
-    // 편집 끝나면 다시 게임 진입
     enterSeats(false);
   }
 }
@@ -1642,6 +1646,9 @@ function renderSeatDotsForEdit(){
 function enterSeats(resetAlive){
   setPhase(Phase.SEATS);
 
+  // ✅ 실패 모달 중복 방지 리셋
+  app.seatFailShown = false;
+
   app.seatEdit = false;
   $("#saveSeatsBtn").style.display = "none";
   $("#resetSeatsBtn").style.display = "none";
@@ -1663,7 +1670,7 @@ function enterSeats(resetAlive){
   app.seatsShownAt = performance.now();
   app.seatsSuccessAt = null;
 
-  $("#seatTitle").textContent = "포도알 잡기";
+  $("#seatTitle").textContent = "자리 잡기";
   $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
 
   const vp = $("#seatViewport");
@@ -1683,8 +1690,7 @@ function enterSeats(resetAlive){
   const remainTarget = targetRemainByDifficulty();
   const { remainTarget: actualRemain, soldOutCount } = applyInitialRemainFixed(app.grapes, remainTarget);
 
-  $("#seatHeaderText").textContent =
-    `* 난이도 ${diffKor()} · 시작 시 이미 빠진 좌석 ${soldOutCount}개 (남은 포도알 ${actualRemain}개)`;
+  $("#seatHeaderText").textContent = "";
 
   renderGrapes();
   startGrapeDisappear();
@@ -1704,17 +1710,19 @@ function renderGrapes(){
 
     if(g.alive){
       aliveCount++;
-      dot.addEventListener("click", (ev)=>{
+            dot.addEventListener("click", (ev)=>{
         ev.stopPropagation();
         if(app.seatEdit) return;
 
+        // ✅ 이선좌(이미 선택된 좌석) 처리: 실패/리셋 아님 → 팝업만 닫고 계속 시도
         if(Math.random() < app.settings.failRate){
-          showMsg("이미 선택된 좌석입니다", "다른 좌석을 선택해주세요.", [
-            { text:"확인", kind:"primary", onClick: hideMsg }
+          showMsg("이선좌입니다", "이미 선택된 좌석이에요.\n창을 닫고 다른 자리를 계속 시도하세요.", [
+            { text:"닫기", kind:"primary", onClick: hideMsg }
           ]);
-          return;
+          return; // ✅ 상태 변화 없음 (g.alive 그대로, 타이머도 그대로)
         }
 
+        // ✅ 성공 처리
         g.alive = false;
         app.seatsSuccessAt = performance.now();
         stopGrapeDisappear();
@@ -1726,6 +1734,12 @@ function renderGrapes(){
   });
 
   $("#remainCount").textContent = String(aliveCount);
+
+  // ✅ 남은 포도알이 0이 되면 자동 실패 처리(중복 방지)
+  if(!app.seatEdit && aliveCount === 0 && !app.seatsSuccessAt && !app.seatFailShown){
+    stopGrapeDisappear();
+    showSeatFailModal("남은 포도알이 모두 사라졌습니다.\n(다른 사람이 먼저 다 가져갔대…)");
+  }
 }
 
 function startGrapeDisappear(){
@@ -1767,17 +1781,64 @@ function removeTwoGrapes(){
 }
 
 /***************
+ * ✅ 실패 모달 (성공과 동일한 3가지 선택지 제공)
+ ***************/
+function showSeatFailModal(reasonText){
+  if(app.seatFailShown) return;
+  app.seatFailShown = true;
+
+  // (선택) 지금까지 걸린 시간도 같이 보고 싶으면 여기에 표시 가능
+  $("#successAds").style.display = "none";
+
+  const lines = [];
+lines.push("좌석이 모두 소진되었습니다.");
+lines.push("");
+lines.push("다시 시도하시겠습니까?");
+showMsg("실패!", lines.join("\n"), [
+    {
+      text:"처음으로",
+      kind:"primary",
+      onClick: ()=>{
+        hideMsg();
+        resetToTheater();
+      }
+    },
+    {
+      text:"보안문자부터",
+      kind:"",
+      onClick: ()=>{
+        hideMsg();
+        stopGrapeDisappear();
+        enterCaptcha();
+      }
+    },
+    {
+      text:"자리 잡기만 다시 하기",
+      kind:"",
+      onClick: ()=>{
+        hideMsg();
+        stopGrapeDisappear();
+        enterSeats(true);
+      }
+    }
+  ]);
+}
+
+/***************
  * 성공 모달
  ***************/
 function showSuccessModal(){
-  const bookMs = (app.bookClickedAt && app.readyAt) ? (app.bookClickedAt - app.readyAt) : null;
-  const capMs  = (app.captchaPassedAt && app.captchaShownAt) ? (app.captchaPassedAt - app.captchaShownAt) : null;
-  const seatMs = (app.seatsSuccessAt && app.seatsShownAt) ? (app.seatsSuccessAt - app.seatsShownAt) : null;
+  const totalMs = (app.seatsSuccessAt && app.bookClickedAt) ? (app.seatsSuccessAt - app.bookClickedAt) : null;
+  const bookMs  = (app.bookClickedAt && app.readyAt) ? (app.bookClickedAt - app.readyAt) : null;
+  const capMs   = (app.captchaPassedAt && app.captchaShownAt) ? (app.captchaPassedAt - app.captchaShownAt) : null;
+  const seatMs  = (app.seatsSuccessAt && app.seatsShownAt) ? (app.seatsSuccessAt - app.seatsShownAt) : null;
 
   const lines = [];
   lines.push("좌석 선택에 성공했습니다!");
   lines.push("");
   lines.push("기록");
+  // ✅ 총 시간(예매하기 클릭 ~ 포도알 성공) 추가
+  lines.push(`- 총 시간(예매→포도알 성공): ${totalMs===null ? "-" : fmtSec(totalMs)}초`);
   lines.push(`- 예매하기 클릭: ${bookMs===null ? "-" : fmtSec(bookMs)}초`);
   lines.push(`- 보안문자 입력: ${capMs===null ? "-" : fmtSec(capMs)}초`);
   lines.push(`- 포도알 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
@@ -1794,7 +1855,7 @@ function showSuccessModal(){
       }
     },
     {
-      text:"보안문자부터",
+      text:"보안문자부터 다시 하기",
       kind:"",
       onClick: ()=>{
         hideMsg();
@@ -1860,6 +1921,8 @@ function resetToTheater(){
   app.captchaPassedAt = null;
   app.seatsShownAt = null;
   app.seatsSuccessAt = null;
+
+  app.seatFailShown = false;
 
   // ✅ 리셋하면 다시 잠금
   app.seatLocked = true;
@@ -2026,7 +2089,6 @@ function boot(){
       { text:"확인", kind:"primary", onClick: hideMsg }
     ]);
 
-    // 편집 끝내고 게임으로 돌아가면 잠금 UI가 적용됨
     setSeatEditMode(false);
   });
 
@@ -2056,9 +2118,17 @@ function boot(){
     zoomAt(e.clientX, e.clientY, app.view.scale * factor);
   }, { passive:false });
 
-  // ✅ 드래그/핀치: 게임/편집 공용
+   // ✅ 드래그/핀치: 게임/편집 공용
   const board = $("#seatBoard");
   board.addEventListener("pointerdown", (e)=>{
+    // ✅ 포도알(좌석 점)을 누른 경우:
+    // 게임 모드에서는 클릭이 우선이라 캡처/드래그를 시작하지 않음.
+    // (편집 모드에서는 점 위 클릭도 편집 로직이 있을 수 있으니, 편집중이면 그대로 진행)
+    const isDot = !!(e.target && e.target.closest && e.target.closest(".seatDot"));
+    if(isDot && !app.seatEdit){
+      return; // 캡처하지 않음 → dot의 click이 정상 동작
+    }
+
     board.setPointerCapture(e.pointerId);
 
     board._pointers = board._pointers || new Map();
