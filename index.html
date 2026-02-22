@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#0b0f1a" />
-  <title>커튼콜 (CurtainCall) - 티켓팅 연습</title>
+  <title>CurtainCall - 티켓팅 연습</title>
   <style>
     :root{
       --bg:#0b0f1a;
@@ -163,18 +163,24 @@
     .adSlot.hidden{ display:none; }
 
     .adBanner{
-      border: 1px dashed #c7cbd1;
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 10px 12px;
-      color:#64748b;
-      font-weight: 900;
-      font-size: 12px;
-      line-height: 1.35;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+  border: 1px dashed #c7cbd1;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 10px 12px;
+  color:#64748b;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.35;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ✅ 성공창(모달) 광고가 display:none에 막히지 않도록 강제 표시 */
+.adBanner .kakao_ad_area{
+  display:block !important;
+  min-height:100px;
+}
 
     .overlay{
       position:absolute;
@@ -1775,7 +1781,7 @@ function showSuccessModal(){
   showMsg("성공!", lines.join("\n"), [
     { text:"처음으로", kind:"primary", onClick: ()=>{ hideMsg(); resetToTheater(); } },
     { text:"보안문자부터 다시 하기", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterCaptcha(); } },
-    { text:"포도알 다시", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterSeats(true); } }
+    { text:"자리 다시 잡기", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterSeats(true); } }
   ]);
 }
 
