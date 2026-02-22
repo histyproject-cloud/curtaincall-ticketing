@@ -2027,12 +2027,11 @@ function onBack(){
   }
 }
 
-function boot(){
+async function boot(){
   initCounters();
   saveSettings(app.settings);
   // ✅ 좌석 기본 JSON을 localStorage에 주입
-  preloadSeatDefaults();
-
+  await preloadSeatDefaults(); // ✅ 여기서 기다림
 
   setPhase(Phase.THEATER);
   setMainButton("시작하기", false);
