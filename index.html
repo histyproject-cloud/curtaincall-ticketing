@@ -598,7 +598,7 @@
           <div class="meta">
             <div class="row"><div class="label">종류</div><div class="value">뮤지컬 · 만 8세 이상 관람가</div></div>
             <div class="row"><div class="label">장소</div><div class="value" id="detailPlace">-</div></div>
-            <div class="row"><div class="label">기간</div><div class="value">2026.03.01 ~ 2026.03.31</div></div>
+            <div class="row"><div class="label">기간</div><div class="value">2026.01.01 ~ 2026.01.31</div></div>
           </div>
         </div>
 
@@ -692,7 +692,7 @@
               </div>
             </div>
             <div class="seatFooter">
-              <div class="left">남은 포도알</div>
+              <div class="left">남은 자리</div>
               <div class="right" id="remainCount">-</div>
             </div>
           </div>
@@ -854,12 +854,8 @@ function diffKor(){
   return "중";
 }
 function diffHintText(){
-  const d = app.settings.difficulty || "mid";
-  if(d === "high") return "상: 남은 좌석 적음 · 대기번호 빡셈 · 이선좌 확률 체감↑";
-  if(d === "mid")  return "중: 밸런스형 · 남은 좌석/대기번호/이선좌 확률 보통";
-  return "하: 남은 좌석 많음 · 대기번호 쉬움 · 이선좌 확률 체감↓";
-}
-function renderDiffUI(){
+  return "";
+}function renderDiffUI(){
   const d = app.settings.difficulty || "mid";
   $all(".diffBtn").forEach(btn=>{
     btn.classList.toggle("sel", btn.dataset.diff === d);
@@ -960,7 +956,7 @@ function phaseLabel(p){
     case Phase.WAIT: return "대기중";
     case Phase.CAL: return "날짜 선택";
     case Phase.CAPTCHA: return "보안문자";
-    case Phase.SEATS: return "포도알";
+    case Phase.SEATS: return "자리";
     default: return "-";
   }
 }
@@ -1491,7 +1487,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(오케이) picked.push(c); // ✅ 오타 수정
+    if(ok) picked.push(c); // ✅ 오타 수정
   }
 
   const guide = [];
@@ -1695,7 +1691,7 @@ function renderGrapes(){
 
   if(!app.seatEdit && aliveCount === 0 && !app.seatsSuccessAt && !app.seatFailShown){
     stopGrapeDisappear();
-    showSeatFailModal("남은 포도알이 모두 사라졌습니다.\n(다른 사람이 먼저 다 가져갔대…)");
+    showSeatFailModal("남은 좌석이 모두 소진되었습니다.");
   }
 }
 
@@ -1769,10 +1765,10 @@ function showSuccessModal(){
   lines.push("좌석 선택에 성공했습니다!");
   lines.push("");
   lines.push("기록");
-  lines.push(`- 총 시간(예매→포도알 성공): ${totalMs===null ? "-" : fmtSec(totalMs)}초`);
+  lines.push(`- 총 플레이 시간: ${totalMs===null ? "-" : fmtSec(totalMs)}초`);
   lines.push(`- 예매하기 클릭: ${bookMs===null ? "-" : fmtSec(bookMs)}초`);
   lines.push(`- 보안문자 입력: ${capMs===null ? "-" : fmtSec(capMs)}초`);
-  lines.push(`- 포도알 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
+  lines.push(`- 자리 잡기 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
 
   $("#successAds").style.display = "block";
 
@@ -1863,7 +1859,7 @@ function openExportModal(){
       kind:"primary",
       onClick: async ()=>{
         const ok = await copyToClipboard($("#transferArea").value);
-        if(오케이) alert("클립보드에 복사했어!");
+        if(ok) alert("클립보드에 복사했어!");
         else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
       }
     },
