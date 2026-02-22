@@ -793,6 +793,39 @@ function fmtSec(ms){
   const s = Math.max(0, ms/1000);
   return s.toFixed(2);
 }
+function reloadAdfitScript(){
+  const old = document.getElementById("kakao-adfit-js");
+  if(old) old.remove();
+
+  const s = document.createElement("script");
+  s.id = "kakao-adfit-js";
+  s.type = "text/javascript";
+  s.src = "//t1.daumcdn.net/kas/static/ba.min.js";
+  s.async = true;
+  document.body.appendChild(s);
+}
+
+function mountSuccessAd(){
+  const banner = document.getElementById("adBannerOnly");
+  if(!banner) return;
+
+  // 기존 ins 제거(이미 처리된 ins는 재처리가 잘 안 됨)
+  const oldIns = banner.querySelector("ins.kakao_ad_area");
+  if(oldIns) oldIns.remove();
+
+  // 새 ins 생성
+  const ins = document.createElement("ins");
+  ins.className = "kakao_ad_area";
+  ins.style.display = "none";
+  ins.setAttribute("data-ad-unit", "DAN-RmMZ6WRdNMwUPhZA");
+  ins.setAttribute("data-ad-width", "320");
+  ins.setAttribute("data-ad-height", "100");
+
+  banner.appendChild(ins);
+
+  // 스크립트 재로드 → 다시 스캔
+  reloadAdfitScript();
+}
 
 const LS = {
   uid: "curtaincall_uid",
@@ -1777,6 +1810,9 @@ function showSuccessModal(){
   lines.push(`- 자리 잡기 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
 
   $("#successAds").style.display = "block";
+// ✅ 성공창 광고 다시 마운트
+mountSuccessAd();
+
 
   showMsg("성공!", lines.join("\n"), [
     { text:"처음으로", kind:"primary", onClick: ()=>{ hideMsg(); resetToTheater(); } },
@@ -1865,8 +1901,8 @@ function openExportModal(){
       kind:"primary",
       onClick: async ()=>{
         const ok = await copyToClipboard($("#transferArea").value);
-        if(ok) alert("클립보드에 복사했어!");
-        else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
+if(ok) alert("클립보드에 복사했어!");
+else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
       }
     },
     { text:"닫기", kind:"", onClick: hideMsg }
@@ -1994,6 +2030,9 @@ function onBack(){
 function boot(){
   initCounters();
   saveSettings(app.settings);
+  // ✅ 좌석 기본 JSON을 localStorage에 주입
+  preloadSeatDefaults();
+
 
   setPhase(Phase.THEATER);
   setMainButton("시작하기", false);
@@ -2186,6 +2225,26 @@ function boot(){
   $("#startOverlay").addEventListener("click", (e)=>{
     if(e.target === $("#startOverlay")) closeStartOverlay();
   });
+}
+
+async function preloadSeatDefaults() {
+  const targets = [
+    { key: "cc_seats_big_v1", file: "big.json" },
+    { key: "cc_seats_mid_v1", file: "mid.json" },
+    { key: "cc_seats_small_v1", file: "small.json" },
+  ];
+  for (const t of targets) {
+    try {
+      const exists = localStorage.getItem(t.key);
+      if (exists) continue;
+      const res = await fetch(t.file, { cache: "no-store" });
+      if (!res.ok) continue;
+      const arr = await res.json();
+      if (Array.isArray(arr) && arr.length) {
+        localStorage.setItem(t.key, JSON.stringify(arr));
+      }
+    } catch (e) {}
+  }
 }
 
 boot();
