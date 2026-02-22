@@ -163,24 +163,24 @@
     .adSlot.hidden{ display:none; }
 
     .adBanner{
-  border: 1px dashed #c7cbd1;
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 10px 12px;
-  color:#64748b;
-  font-weight: 900;
-  font-size: 12px;
-  line-height: 1.35;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+      border: 1px dashed #c7cbd1;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color:#64748b;
+      font-weight: 900;
+      font-size: 12px;
+      line-height: 1.35;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
-/* ✅ 성공창(모달) 광고가 display:none에 막히지 않도록 강제 표시 */
-.adBanner .kakao_ad_area{
-  display:block !important;
-  min-height:100px;
-}
+    /* ✅ 성공창(모달) 광고가 display:none에 막히지 않도록 강제 표시 */
+    .adBanner .kakao_ad_area{
+      display:block !important;
+      min-height:100px;
+    }
 
     .overlay{
       position:absolute;
@@ -837,6 +837,28 @@ const LS = {
   snapSmall: "cc_snap_small_v1",
 };
 
+/* ✅ 인앱브라우저(localStorage 막힘) 대비 */
+const Storage = {
+  ok: (()=> {
+    try{
+      const k="__cc_test__";
+      localStorage.setItem(k,"1");
+      localStorage.removeItem(k);
+      return true;
+    }catch{
+      return false;
+    }
+  })(),
+  get(key){
+    if(!this.ok) return null;
+    try{ return localStorage.getItem(key); }catch{ return null; }
+  },
+  set(key, val){
+    if(!this.ok) return false;
+    try{ localStorage.setItem(key, val); return true; }catch{ return false; }
+  }
+};
+
 function uuid(){
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c=>{
     const r = (Math.random()*16)|0;
@@ -894,7 +916,8 @@ function diffKor(){
 }
 function diffHintText(){
   return "";
-}function renderDiffUI(){
+}
+function renderDiffUI(){
   const d = app.settings.difficulty || "mid";
   $all(".diffBtn").forEach(btn=>{
     btn.classList.toggle("sel", btn.dataset.diff === d);
@@ -948,6 +971,9 @@ const app = {
   phase: Phase.THEATER,
   settings: loadSettings(),
   selectedTheater: null,
+
+  /* ✅ 인앱브라우저에서 localStorage 막혀도 좌석 유지용(메모리 폴백) */
+  defaults: { big:null, mid:null, small:null },
 
   seatLocked: true,
 
@@ -1113,27 +1139,20 @@ function getSeatMapInfo(){
     t==="mid" ? LS.snapMid :
     LS.snapSmall;
 
-  return { mapSrc, seatKey, snapKey };
+  return { mapSrc, seatKey, snapKey, theaterKey: t };
 }
 
+/* ✅ loadSeatPoints / saveSeatPoints / saveSnapGuide: 인앱브라우저 폴백 포함 */
 function loadSeatPoints(){
-  const { mapSrc, seatKey, snapKey } = getSeatMapInfo();
+  const { mapSrc, seatKey, snapKey, theaterKey } = getSeatMapInfo();
   app.seatKey = seatKey;
   app.snapKey = snapKey;
 
   const img = $("#seatMapImg");
   if(img) img.src = mapSrc;
 
-  const raw = localStorage.getItem(seatKey);
-  let points = [];
-  if(raw){
-    try{
-      const arr = JSON.parse(raw);
-      if(Array.isArray(arr)) points = arr;
-    }catch{}
-  }
-
-  const sg = localStorage.getItem(snapKey);
+  // snapGuide
+  const sg = Storage.get(snapKey);
   app.snapGuide = [];
   if(sg){
     try{
@@ -1142,15 +1161,28 @@ function loadSeatPoints(){
     }catch{}
   }
 
-  return points;
+  // 1) localStorage(가능하면)에서 읽기
+  const raw = Storage.get(seatKey);
+  if(raw){
+    try{
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr) && arr.length > 0) return arr;
+    }catch{}
+  }
+
+  // 2) 폴백: 메모리 defaults
+  const def = app.defaults?.[theaterKey];
+  if(Array.isArray(def) && def.length > 0) return def;
+
+  return [];
 }
 function saveSeatPoints(){
   if(!app.seatKey) return;
-  localStorage.setItem(app.seatKey, JSON.stringify(app.seatPoints));
+  Storage.set(app.seatKey, JSON.stringify(app.seatPoints));
 }
 function saveSnapGuide(){
   if(!app.snapKey) return;
-  localStorage.setItem(app.snapKey, JSON.stringify(app.snapGuide));
+  Storage.set(app.snapKey, JSON.stringify(app.snapGuide));
 }
 
 function openStartOverlay(){
@@ -1526,7 +1558,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(ok) picked.push(c); // ✅ 오타 수정
+    if(오케이) picked.push(c);
   }
 
   const guide = [];
@@ -1810,9 +1842,8 @@ function showSuccessModal(){
   lines.push(`- 자리 잡기 성공: ${seatMs===null ? "-" : fmtSec(seatMs)}초`);
 
   $("#successAds").style.display = "block";
-// ✅ 성공창 광고 다시 마운트
-mountSuccessAd();
-
+  // ✅ 성공창 광고 다시 마운트
+  mountSuccessAd();
 
   showMsg("성공!", lines.join("\n"), [
     { text:"처음으로", kind:"primary", onClick: ()=>{ hideMsg(); resetToTheater(); } },
@@ -1853,10 +1884,10 @@ function getTransferPayload(){
   const { seatKey, snapKey } = getSeatMapInfo();
 
   const seatRaw = JSON.stringify(
-    (app.seatPoints && app.seatPoints.length) ? app.seatPoints : (JSON.parse(localStorage.getItem(seatKey) || "[]"))
+    (app.seatPoints && app.seatPoints.length) ? app.seatPoints : (JSON.parse(Storage.get(seatKey) || "[]"))
   );
   const snapRaw = JSON.stringify(
-    (app.snapGuide && app.snapGuide.length) ? app.snapGuide : (JSON.parse(localStorage.getItem(snapKey) || "[]"))
+    (app.snapGuide && app.snapGuide.length) ? app.snapGuide : (JSON.parse(Storage.get(snapKey) || "[]"))
   );
 
   const payload = {
@@ -1901,8 +1932,8 @@ function openExportModal(){
       kind:"primary",
       onClick: async ()=>{
         const ok = await copyToClipboard($("#transferArea").value);
-if(ok) alert("클립보드에 복사했어!");
-else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
+        if(오케이) alert("클립보드에 복사했어!");
+        else alert("자동 복사 실패! 아래 칸에서 수동으로 Ctrl+C 해줘.");
       }
     },
     { text:"닫기", kind:"", onClick: hideMsg }
@@ -1936,8 +1967,8 @@ function openImportModal(){
           }
 
           const { seatKey, snapKey } = getSeatMapInfo();
-          localStorage.setItem(seatKey, JSON.stringify(obj.seatPoints));
-          localStorage.setItem(snapKey, JSON.stringify(Array.isArray(obj.snapGuide) ? obj.snapGuide : []));
+          Storage.set(seatKey, JSON.stringify(obj.seatPoints));
+          Storage.set(snapKey, JSON.stringify(Array.isArray(obj.snapGuide) ? obj.snapGuide : []));
 
           app.seatPoints = obj.seatPoints;
           app.snapGuide = Array.isArray(obj.snapGuide) ? obj.snapGuide : [];
@@ -2030,7 +2061,7 @@ function onBack(){
 async function boot(){
   initCounters();
   saveSettings(app.settings);
-  // ✅ 좌석 기본 JSON을 localStorage에 주입
+  // ✅ 좌석 기본 JSON을 localStorage에 주입(+ 인앱 폴백은 app.defaults)
   await preloadSeatDefaults(); // ✅ 여기서 기다림
 
   setPhase(Phase.THEATER);
@@ -2127,16 +2158,16 @@ async function boot(){
   });
 
   $("#resetSeatsBtn").addEventListener("click", async ()=>{
-  if(!app.seatEdit) return;
+    if(!app.seatEdit) return;
 
-  await preloadSeatDefaults(true); // ✅ 강제 재다운로드
-  app.seatPoints = loadSeatPoints();
-  renderSeatDotsForEdit();
+    await preloadSeatDefaults(true); // ✅ 강제 재다운로드
+    app.seatPoints = loadSeatPoints();
+    renderSeatDotsForEdit();
 
-  showMsg("복구 완료", "깃허브 기본 좌석을 다시 불러왔어!", [
-    { text:"확인", kind:"primary", onClick: hideMsg }
-  ]);
-});
+    showMsg("복구 완료", "기본 좌석을 다시 불러왔어!", [
+      { text:"확인", kind:"primary", onClick: hideMsg }
+    ]);
+  });
 
   $("#snapBuildBtn").addEventListener("click", async ()=>{
     if(!app.seatEdit) return;
@@ -2232,45 +2263,45 @@ async function boot(){
   });
 }
 
+/* ✅ 핵심: raw.githubusercontent.com 제거 → same-origin ./big.json ./mid.json ./small.json */
 async function preloadSeatDefaults(force = false) {
   const targets = [
-    {
-      key: "cc_seats_big_v1",
-      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/big.json",
-    },
-    {
-      key: "cc_seats_mid_v1",
-      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/mid.json",
-    },
-    {
-      key: "cc_seats_small_v1",
-      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/small.json",
-    },
+    { theater:"big",   key:"cc_seats_big_v1",   url:"./big.json" },
+    { theater:"mid",   key:"cc_seats_mid_v1",   url:"./mid.json" },
+    { theater:"small", key:"cc_seats_small_v1", url:"./small.json" },
   ];
 
   for (const t of targets) {
     try {
-      const raw = localStorage.getItem(t.key);
-
-      // ✅ 이미 있어도, 내용이 [] 이거나 깨졌으면 다시 받기
-      let need = force || !raw;
-      if (!need) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed) || parsed.length === 0) need = true;
-        } catch {
-          need = true;
+      // 0) 이미 저장된 게 있으면(유효하면) 그걸 defaults에도 복사
+      let hasValidSaved = false;
+      if(!force){
+        const raw = Storage.get(t.key);
+        if(raw){
+          try{
+            const parsed = JSON.parse(raw);
+            if(Array.isArray(parsed) && parsed.length > 0){
+              app.defaults[t.theater] = parsed; // ✅ 메모리 폴백 세팅
+              hasValidSaved = true;
+            }
+          }catch{}
         }
       }
-      if (!need) continue;
+      if(hasValidSaved && !force) continue;
 
-      // ✅ 캐시 꼬임 방지용 파라미터
+      // 1) same-origin에서 로드
       const res = await fetch(`${t.url}?v=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) continue;
 
-      const arr = await res.json();
+      const text = (await res.text()).replace(/^\uFEFF/, "");
+      const arr = JSON.parse(text);
+
       if (Array.isArray(arr) && arr.length > 0) {
-        localStorage.setItem(t.key, JSON.stringify(arr));
+        // ✅ 메모리 defaults는 무조건 세팅
+        app.defaults[t.theater] = arr;
+
+        // ✅ localStorage 가능하면 저장도
+        Storage.set(t.key, JSON.stringify(arr));
       }
     } catch (e) {}
   }
