@@ -101,6 +101,31 @@
       font-weight:800;
     }
 
+    /* ✅ 상단 문의 문구(사이트 특 흐린 글씨 느낌) */
+    .contactHint{
+      font-size:12px;
+      font-weight:900;
+      color:#9ca3af;
+      letter-spacing:-.2px;
+      filter: blur(.0px);
+      opacity:.9;
+      white-space:nowrap;
+    }
+
+    /* ✅ TOP 광고 영역 */
+    .topAdWrap{
+      padding:10px 16px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .topAdWrap .kakao_ad_area{
+      display:block !important; /* 애드핏은 ins가 display:none이면 렌더 안되는 경우가 있음 */
+      min-height:50px;
+    }
+
     /* 하단 고정 버튼 */
     .bottom{
       position:absolute;
@@ -134,6 +159,9 @@
       font-weight: 900;
       font-size: 13px;
       line-height: 1.4;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
     .adSlot small{display:block; font-weight:800; color:#94a3b8; margin-top:6px;}
     .adSlot.hidden{ display:none; }
@@ -148,8 +176,10 @@
       font-weight: 900;
       font-size: 12px;
       line-height: 1.35;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
-    .adBanner small{display:block; font-weight:800; color:#94a3b8; margin-top:4px;}
 
     /* 모달 */
     .overlay{
@@ -538,8 +568,20 @@
     <div class="content" id="content">
       <div class="counters">
         <span class="chip">누적 시작 <b id="uStarts">0</b></span>
+
         <span class="spacer"></span>
-        <span class="mini" id="phaseText">-</span>
+
+        <!-- ✅ 문의 문구 -->
+        <span class="contactHint">문의: histy.project@gmail.com</span>
+      </div>
+
+      <!-- ✅ TOP 배너(320x50): 모든 화면 상단에 항상 노출 -->
+      <div class="topAdWrap" id="topAdWrap">
+        <ins class="kakao_ad_area"
+             style="display:none;"
+             data-ad-unit="DAN-vmfnJX3JCxlk6Kua"
+             data-ad-width="320"
+             data-ad-height="50"></ins>
       </div>
 
       <!-- 화면 0: 극장 선택 -->
@@ -589,10 +631,13 @@
 
         <div class="section muted" style="font-weight:900;"></div>
 
-        <!-- ✅ "시작하기 누르기 전" 팝업 광고 자리 -->
+        <!-- ✅ 예매 시작 전 배너(320x100) -->
         <div class="adSlot" id="adPreStart">
-          📌 (광고 자리) 시작 전 팝업/전면 광고 컨테이너<br/>
-          <small>여기에 AdSense/Adfit 코드(또는 커스텀 팝업)를 넣으면 됨. 시뮬 시작 후에는 자동 숨김.</small>
+          <ins class="kakao_ad_area"
+               style="display:none;"
+               data-ad-unit="DAN-zye8qTzAxnhStzMp"
+               data-ad-width="320"
+               data-ad-height="100"></ins>
         </div>
       </div>
 
@@ -737,15 +782,14 @@
           </div>
         </div>
 
+        <!-- ✅ 성공 모달 내 성공 배너(320x100) -->
         <div class="modalBody" id="successAds" style="display:none; padding-top:0;">
-          <div class="adBanner" id="adBannerTop">
-            (광고 자리) 성공 후 상단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
-          </div>
-          <div style="height:10px"></div>
-          <div class="adBanner" id="adBannerBottom">
-            (광고 자리) 성공 후 하단 배너
-            <small>여기에 배너 광고 코드 붙이면 됨</small>
+          <div class="adBanner" id="adBannerOnly">
+            <ins class="kakao_ad_area"
+                 style="display:none;"
+                 data-ad-unit="DAN-RmMZ6WRdNMwUPhZA"
+                 data-ad-width="320"
+                 data-ad-height="100"></ins>
           </div>
         </div>
 
@@ -763,15 +807,6 @@
   </div>
 
 <script>
-/***************
- * ✅ 기본 좌석 JSON URL (big/mid/small)
- ***************/
-const SEAT_JSON_URLS = {
-  big:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/big.json",
-  mid:   "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/mid.json",
-  small: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/small.json",
-};
-
 /***************
  * 헬퍼
  ***************/
@@ -964,9 +999,6 @@ const app = {
   snapGuide: [],
   snapKey: null,
 
-  // ✅ 기본 좌석 로드 중 중복 fetch 방지
-  preload: { promise: null },
-
   view: {
     scale: 1,
     tx: 0,
@@ -1118,71 +1150,9 @@ function getSeatMapInfo(){
     t==="mid" ? LS.snapMid :
     LS.snapSmall;
 
-  const url = SEAT_JSON_URLS[t] || SEAT_JSON_URLS.big;
-
-  return { mapSrc, seatKey, snapKey, url };
+  return { mapSrc, seatKey, snapKey };
 }
 
-/***************
- * ✅ 기본 좌석 JSON을 받아서 localStorage에 저장 (처음 1회)
- * - 형식 지원:
- *   1) [ {x,y}, ... ]
- *   2) { seatPoints:[...], snapGuide:[...] } (export 형태)
- ***************/
-async function fetchDefaultSeatsIfNeeded(){
-  const { seatKey, snapKey, url } = getSeatMapInfo();
-
-  // 이미 로컬에 있으면 스킵
-  const existing = localStorage.getItem(seatKey);
-  if(existing){
-    try{
-      const arr = JSON.parse(existing);
-      if(Array.isArray(arr) && arr.length) return true;
-    }catch{}
-  }
-
-  try{
-    const res = await fetch(url, { cache: "no-store" });
-    if(!res.ok) throw new Error("http");
-    const txt = await res.text();
-    const data = JSON.parse(txt);
-
-    let seatPoints = [];
-    let snapGuide = [];
-
-    if(Array.isArray(data)){
-      seatPoints = data;
-    }else if(data && Array.isArray(data.seatPoints)){
-      seatPoints = data.seatPoints;
-      if(Array.isArray(data.snapGuide)) snapGuide = data.snapGuide;
-      // 혹시 field명이 seatpoints 같은 변형이면 확장 가능
-    }else if(data && Array.isArray(data.points)){
-      seatPoints = data.points;
-    }
-
-    // 좌표 형태 검증(대충)
-    seatPoints = seatPoints
-      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
-      .map(p => ({ x: p.x, y: p.y }));
-
-    snapGuide = (Array.isArray(snapGuide) ? snapGuide : [])
-      .filter(p => p && typeof p.x === "number" && typeof p.y === "number")
-      .map(p => ({ x: p.x, y: p.y }));
-
-    if(seatPoints.length){
-      localStorage.setItem(seatKey, JSON.stringify(seatPoints));
-      localStorage.setItem(snapKey, JSON.stringify(snapGuide));
-      return true;
-    }
-    return false;
-  }catch{
-    return false;
-  }
-}
-
-/***************
- * ✅ 좌석/스냅 로드
- ***************/
 function loadSeatPoints(){
   const { mapSrc, seatKey, snapKey } = getSeatMapInfo();
   app.seatKey = seatKey;
@@ -1218,36 +1188,6 @@ function saveSeatPoints(){
 function saveSnapGuide(){
   if(!app.snapKey) return;
   localStorage.setItem(app.snapKey, JSON.stringify(app.snapGuide));
-}
-
-/***************
- * ✅ 좌석이 비어있으면 원격 JSON에서 자동 로드 후 다시 로드
- ***************/
-async function ensureSeatPointsLoaded(){
-  // 중복 호출 방지
-  if(app.preload.promise) return app.preload.promise;
-
-  app.preload.promise = (async ()=>{
-    // 1) 먼저 현재 로컬 로드
-    let pts = loadSeatPoints();
-    if(pts && pts.length){
-      app.seatPoints = pts;
-      return true;
-    }
-
-    // 2) 로컬에 없으면 기본 JSON fetch
-    const ok = await fetchDefaultSeatsIfNeeded();
-
-    // 3) 다시 로드
-    pts = loadSeatPoints();
-    app.seatPoints = pts;
-
-    return !!(ok && pts && pts.length);
-  })();
-
-  const result = await app.preload.promise;
-  app.preload.promise = null;
-  return result;
 }
 
 /***************
@@ -1641,7 +1581,7 @@ async function buildSnapGuideFromImage(){
         ok = false; break;
       }
     }
-    if(오케이) picked.push(c);
+    if(오케이) picked.push(c); // ✅ 버그 수정
   }
 
   const guide = [];
@@ -1757,63 +1697,59 @@ function renderSeatDotsForEdit(){
  * ✅ 포도알(좌석) 게임
  ***************/
 function enterSeats(resetAlive){
-  // async가 필요해서 내부에서 실행
-  (async ()=>{
-    setPhase(Phase.SEATS);
+  setPhase(Phase.SEATS);
 
-    app.seatFailShown = false;
+  app.seatFailShown = false;
 
-    app.seatEdit = false;
-    $("#saveSeatsBtn").style.display = "none";
-    $("#resetSeatsBtn").style.display = "none";
-    $("#snapBuildBtn").style.display = "none";
-    $("#zoomResetBtn").style.display = "none";
+  app.seatEdit = false;
+  $("#saveSeatsBtn").style.display = "none";
+  $("#resetSeatsBtn").style.display = "none";
+  $("#snapBuildBtn").style.display = "none";
+  $("#zoomResetBtn").style.display = "none";
 
-    $("#exportSeatsBtn").style.display = "none";
-    $("#importSeatsBtn").style.display = "none";
+  $("#exportSeatsBtn").style.display = "none";
+  $("#importSeatsBtn").style.display = "none";
 
-    $("#editSeatsBtn").textContent = "좌석설정";
-    updateSeatLockUI();
+  $("#editSeatsBtn").textContent = "좌석설정";
+  updateSeatLockUI();
 
-    resetView();
+  resetView();
 
-    // ✅ 여기서 자동 로드 보장
-    await ensureSeatPointsLoaded();
+  app.seatPoints = loadSeatPoints();
 
-    let size;
-    if(app.selectedTheater === "big") size = "4px";
-    else if(app.selectedTheater === "mid") size = "7px";
-    else size = "10px";
-    document.documentElement.style.setProperty('--dotSize', size);
+  let size;
+  if(app.selectedTheater === "big") size = "4px";
+  else if(app.selectedTheater === "mid") size = "7px";
+  else size = "10px";
+  document.documentElement.style.setProperty('--dotSize', size);
 
-    app.seatsShownAt = performance.now();
-    app.seatsSuccessAt = null;
+  app.seatsShownAt = performance.now();
+  app.seatsSuccessAt = null;
 
-    $("#seatTitle").textContent = "자리 잡기";
-    $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
+  $("#seatTitle").textContent = "자리 잡기";
+  $("#seatSub").textContent = `날짜: ${app.pickedDate ?? "-"} · 난이도: ${diffKor()}`;
 
-    const vp = $("#seatViewport");
-    Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
-    Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
+  const vp = $("#seatViewport");
+  Array.from(vp.querySelectorAll(".seatDot")).forEach(el=>el.remove());
+  Array.from(vp.querySelectorAll(".snapGuide")).forEach(el=>el.remove());
 
-    if(!app.seatPoints || app.seatPoints.length === 0){
-      stopGrapeDisappear();
-      app.grapes = [];
-      $("#seatHeaderText").textContent = "* 아직 좌석이 없어! (기본 좌석 불러오기를 실패했을 수도 있어)\n‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
-      $("#remainCount").textContent = "0";
-      return;
-    }
+  if(app.seatPoints.length === 0){
+    stopGrapeDisappear();
+    app.grapes = [];
+    $("#seatHeaderText").textContent = "* 아직 좌석이 없어! ‘좌석설정’ 눌러서 동그라미들부터 찍고 저장해줘.";
+    $("#remainCount").textContent = "0";
+    return;
+  }
 
-    app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
+  app.grapes = app.seatPoints.map((p, i)=>({ id:"s"+i, x:p.x, y:p.y, alive:true }));
 
-    const remainTarget = targetRemainByDifficulty();
-    applyInitialRemainFixed(app.grapes, remainTarget);
+  const remainTarget = targetRemainByDifficulty();
+  applyInitialRemainFixed(app.grapes, remainTarget);
 
-    $("#seatHeaderText").textContent = "";
+  $("#seatHeaderText").textContent = "";
 
-    renderGrapes();
-    startGrapeDisappear();
-  })();
+  renderGrapes();
+  startGrapeDisappear();
 }
 
 function renderGrapes(){
@@ -2228,8 +2164,7 @@ function boot(){
 
   $("#navBack").addEventListener("click", onBack);
 
-  // 🔒 좌석 편집 토글 (+ 비밀번호)
-  $("#editSeatsBtn").addEventListener("click", async ()=>{
+  $("#editSeatsBtn").addEventListener("click", ()=>{
     if(app.phase !== Phase.SEATS) return;
 
     if(app.seatEdit){
@@ -2248,9 +2183,7 @@ function boot(){
       alert("편집모드가 활성화되었습니다.");
     }
 
-    // 편집 모드에서도 기본 좌석 자동 로드 시도
-    await ensureSeatPointsLoaded();
-
+    app.seatPoints = loadSeatPoints();
     setSeatEditMode(true);
   });
 
@@ -2372,5 +2305,9 @@ function boot(){
 
 boot();
 </script>
+
+<!-- ✅ 애드핏 스크립트는 페이지에 "한 번만" -->
+<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
 </body>
 </html>
