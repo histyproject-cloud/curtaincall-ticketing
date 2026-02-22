@@ -2127,11 +2127,17 @@ function boot(){
     setSeatEditMode(false);
   });
 
-  $("#resetSeatsBtn").addEventListener("click", ()=>{
-    if(!app.seatEdit) return;
-    app.seatPoints = [];
-    renderSeatDotsForEdit();
-  });
+  $("#resetSeatsBtn").addEventListener("click", async ()=>{
+  if(!app.seatEdit) return;
+
+  await preloadSeatDefaults(true); // ✅ 강제 재다운로드
+  app.seatPoints = loadSeatPoints();
+  renderSeatDotsForEdit();
+
+  showMsg("복구 완료", "깃허브 기본 좌석을 다시 불러왔어!", [
+    { text:"확인", kind:"primary", onClick: hideMsg }
+  ]);
+});
 
   $("#snapBuildBtn").addEventListener("click", async ()=>{
     if(!app.seatEdit) return;
@@ -2227,20 +2233,44 @@ function boot(){
   });
 }
 
-async function preloadSeatDefaults() {
+async function preloadSeatDefaults(force = false) {
   const targets = [
-    { key: "cc_seats_big_v1", file: "big.json" },
-    { key: "cc_seats_mid_v1", file: "mid.json" },
-    { key: "cc_seats_small_v1", file: "small.json" },
+    {
+      key: "cc_seats_big_v1",
+      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/big.json",
+    },
+    {
+      key: "cc_seats_mid_v1",
+      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/mid.json",
+    },
+    {
+      key: "cc_seats_small_v1",
+      url: "https://raw.githubusercontent.com/histyproject-cloud/curtaincall-ticketing/refs/heads/main/small.json",
+    },
   ];
+
   for (const t of targets) {
     try {
-      const exists = localStorage.getItem(t.key);
-      if (exists) continue;
-      const res = await fetch(t.file, { cache: "no-store" });
+      const raw = localStorage.getItem(t.key);
+
+      // ✅ 이미 있어도, 내용이 [] 이거나 깨졌으면 다시 받기
+      let need = force || !raw;
+      if (!need) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed) || parsed.length === 0) need = true;
+        } catch {
+          need = true;
+        }
+      }
+      if (!need) continue;
+
+      // ✅ 캐시 꼬임 방지용 파라미터
+      const res = await fetch(`${t.url}?v=${Date.now()}`, { cache: "no-store" });
       if (!res.ok) continue;
+
       const arr = await res.json();
-      if (Array.isArray(arr) && arr.length) {
+      if (Array.isArray(arr) && arr.length > 0) {
         localStorage.setItem(t.key, JSON.stringify(arr));
       }
     } catch (e) {}
