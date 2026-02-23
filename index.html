@@ -1808,7 +1808,9 @@ function showSeatFailModal(reasonText){
   if(app.seatFailShown) return;
   app.seatFailShown = true;
 
-  $("#successAds").style.display = "none";
+  // ✅ 실패에서도 광고 보이게
+  $("#successAds").style.display = "block";
+  mountSuccessAd();
 
   const lines = [];
   lines.push("좌석이 모두 소진되었습니다.");
@@ -1825,7 +1827,6 @@ function showSeatFailModal(reasonText){
     { text:"자리 잡기만 다시 하기", kind:"", onClick: ()=>{ hideMsg(); stopGrapeDisappear(); enterSeats(true); } }
   ]);
 }
-
 function showSuccessModal(){
   const totalMs = (app.seatsSuccessAt && app.bookClickedAt) ? (app.seatsSuccessAt - app.bookClickedAt) : null;
   const bookMs  = (app.bookClickedAt && app.readyAt) ? (app.bookClickedAt - app.readyAt) : null;
