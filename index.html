@@ -4,27 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#0b0f1a" />
+  <title>CurtainCall - 티켓팅 연습</title>
+  <meta property="og:title" content="CurtainCall - 티켓팅 시뮬레이션">
+<meta property="og:description" content="티켓팅 실전 연습">
+<meta property="og:image" content="https://curtaincall-ticketing.com/thumbnail.png">
+<meta property="og:url" content="https://curtaincall-ticketing.com">
+<meta property="og:type" content="website">
 
-  <!-- ✅ 기존 title 교체 -->
-  <title>티켓팅 연습 사이트 | 실전 티켓팅 시뮬레이션 - 커튼콜 CurtainCall</title>
-
-  <!-- ✅ SEO 추가 -->
-  <meta name="description" content="뮤지컬·콘서트 실전 티켓팅 연습 사이트. 대극장·중극장·소극장 난이도 선택 가능. 좌석 클릭·이선좌·보안문자까지 무료로 시뮬레이션하세요.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://curtaincall-ticketing.com/">
-
-  <!-- ✅ Open Graph 수정 -->
-  <meta property="og:title" content="티켓팅 연습 사이트 | 커튼콜 CurtainCall">
-  <meta property="og:description" content="뮤지컬·콘서트 실전 티켓팅 연습. 좌석 클릭·이선좌·보안문자까지 무료 시뮬레이션 제공.">
-  <meta property="og:image" content="https://curtaincall-ticketing.com/thumbnail.png">
-  <meta property="og:url" content="https://curtaincall-ticketing.com/">
-  <meta property="og:type" content="website">
-
-  <!-- ✅ Twitter 수정 -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="티켓팅 연습 사이트 | 커튼콜 CurtainCall">
-  <meta name="twitter:description" content="좌석 클릭·이선좌·보안문자까지 실전처럼 연습하는 무료 티켓팅 시뮬레이션">
-  <meta name="twitter:image" content="https://curtaincall-ticketing.com/thumbnail.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CurtainCall - 실전 티켓팅 연습">
+<meta name="twitter:description" content="이선좌 · 좌석 클릭 실전 체감 연습">
+<meta name="twitter:image" content="https://curtaincall-ticketing.com/thumbnail.png">
   <style>
     :root{
       --bg:#0b0f1a;
@@ -563,19 +553,12 @@
 </head>
 
 <body>
-
-<section style="text-align:center; padding:30px 20px; color:white;">
-  <h1 style="font-size:20px; margin-bottom:10px;">
-    실전 티켓팅 연습 시뮬레이션
-  </h1>
-  <p style="font-size:14px; color:#cbd5e1;">
-    커튼콜은 뮤지컬·콘서트 티켓팅 연습을 실제처럼 체험할 수 있는 무료 티켓팅 연습 사이트입니다.
-    대극장, 중극장, 소극장 난이도를 선택하여 실전 감각을 키워보세요.
-  </p>
-</section>
-
   <div class="frame" id="frame">
     <div class="topbar">
+      <button class="iconbtn" id="navBack" aria-label="이전">←</button>
+      <div class="title" id="topTitle">커튼콜 (CurtainCall)</div>
+      <button class="iconbtn" id="noop" aria-label="빈버튼" style="opacity:.0; pointer-events:none;">⋮</button>
+    </div>
 
     <div class="content" id="content">
       <div class="counters">
@@ -2349,6 +2332,3 @@ boot();
 </body>
 
 </html>
-
-
-
