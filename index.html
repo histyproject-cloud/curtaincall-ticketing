@@ -697,9 +697,10 @@
             </div>
 
             <div class="seatTopActions">
-              <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>
+              
               <button class="miniBtn secondary" id="exportSeatsBtn" type="button" style="display:none;">내보내기</button>
               <button class="miniBtn secondary" id="importSeatsBtn" type="button" style="display:none;">가져오기</button>
+              <button class="miniBtn locked" id="editSeatsBtn" type="button">좌석설정</button>  
 
               <button class="miniBtn secondary" id="saveSeatsBtn" type="button" style="display:none;">저장</button>
               <button class="miniBtn secondary" id="resetSeatsBtn" type="button" style="display:none;">초기화</button>
@@ -2139,29 +2140,7 @@ async function boot(){
 
   $("#navBack").addEventListener("click", onBack);
 
-  $("#editSeatsBtn").addEventListener("click", ()=>{
-    if(app.phase !== Phase.SEATS) return;
-
-    if(app.seatEdit){
-      setSeatEditMode(false);
-      return;
-    }
-
-    if(app.seatLocked){
-      const pw = prompt("좌석 편집 비밀번호를 입력하세요");
-      if(pw !== ADMIN_PW){
-        alert("비밀번호가 틀렸습니다.");
-        return;
-      }
-      app.seatLocked = false;
-      updateSeatLockUI();
-      alert("편집모드가 활성화되었습니다.");
-    }
-
-    app.seatPoints = loadSeatPoints();
-    setSeatEditMode(true);
-  });
-
+ 
   $("#exportSeatsBtn").addEventListener("click", openExportModal);
   $("#importSeatsBtn").addEventListener("click", openImportModal);
 
@@ -2342,6 +2321,5 @@ boot();
 </body>
 
 </html>
-
 
 
