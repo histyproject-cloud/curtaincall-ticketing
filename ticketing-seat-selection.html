@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>콘서트·뮤지컬 좌석 선택 방법 & 구역별 특징 | 커튼콜</title>
+<meta name="description" content="콘서트·뮤지컬 티켓팅 좌석 선택 가이드. R석·S석·A석 차이, 구역별 시야, 이선좌 상황에서의 좌석 선택 전략까지 안내합니다.">
+<meta name="keywords" content="티켓팅 좌석 선택, 콘서트 좌석 구역, 뮤지컬 좌석 추천, 티켓팅 좌석 전략, 이선좌 좌석 선택">
+<link rel="canonical" href="https://curtaincall-ticketing.com/ticketing-seat-selection">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="콘서트·뮤지컬 좌석 선택 가이드 | 커튼콜">
+<meta property="og:description" content="R석·S석·A석 차이, 구역별 시야, 이선좌 상황에서의 좌석 선택 전략을 안내합니다.">
+<meta property="og:url" content="https://curtaincall-ticketing.com/ticketing-seat-selection">
+<meta property="og:type" content="article">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0b0f1a; --surface: #111827;
+    --accent: #7c3aed; --accent2: #a78bfa;
+    --text: #f9fafb; --muted: #6b7280; --line: #1f2937;
+    --gold: #f59e0b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 60px;
+    background: rgba(11,15,26,.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo { font-weight: 900; font-size: 18px; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent2); }
+  .nav-cta {
+    display: inline-flex; align-items: center;
+    padding: 8px 18px; border-radius: 999px;
+    background: var(--accent); color: #fff;
+    font-weight: 700; font-size: 14px; text-decoration: none; transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  .article-hero {
+    padding: 64px 24px 48px; max-width: 800px; margin: 0 auto;
+    border-bottom: 1px solid var(--line);
+  }
+  .cat { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; }
+  h1 { font-size: clamp(26px, 5vw, 38px); font-weight: 900; letter-spacing: -.03em; margin-bottom: 14px; word-break: keep-all; line-height: 1.2; }
+  .hero-desc { color: #9ca3af; font-size: 16px; word-break: keep-all; }
+
+  article { max-width: 800px; margin: 0 auto; padding: 48px 24px 72px; }
+  h2 { font-size: clamp(19px, 3vw, 24px); font-weight: 900; letter-spacing: -.02em; margin: 48px 0 14px; word-break: keep-all; }
+  h2:first-of-type { margin-top: 0; }
+  p { color: #d1d5db; font-size: 15px; margin-bottom: 14px; word-break: keep-all; line-height: 1.8; }
+  strong { color: var(--text); }
+
+  /* 좌석 등급 카드 */
+  .grade-grid { display: grid; gap: 12px; margin: 20px 0; }
+  .grade-card {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 18px 20px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .grade-badge {
+    width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px;
+    display: grid; place-items: center;
+    font-weight: 900; font-size: 16px;
+  }
+  .r-badge { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); color: #fcd34d; }
+  .s-badge { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3); color: var(--accent2); }
+  .a-badge { background: rgba(107,114,128,.15); border: 1px solid rgba(107,114,128,.3); color: #9ca3af; }
+  .grade-card h3 { font-weight: 900; font-size: 16px; margin-bottom: 5px; }
+  .grade-card p { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.6; word-break: keep-all; }
+
+  /* 전략 목록 */
+  .strategy-list { display: grid; gap: 14px; margin: 20px 0; }
+  .strategy-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 18px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .s-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .strategy-item h3 { font-weight: 900; font-size: 15px; margin-bottom: 5px; }
+  .strategy-item p { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.6; word-break: keep-all; }
+
+  .callout {
+    padding: 18px 20px; border-radius: 14px; margin: 16px 0;
+    background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.2);
+  }
+  .callout p { margin: 0; color: #c4b5fd; font-size: 14px; }
+
+  .practice-cta {
+    margin: 48px 0 0; padding: 36px; border-radius: 20px;
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(167,139,250,.06));
+    border: 1px solid rgba(124,58,237,.3); text-align: center;
+  }
+  .practice-cta h3 { font-weight: 900; font-size: 20px; margin-bottom: 10px; }
+  .practice-cta p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 28px; border-radius: 12px;
+    background: var(--accent); color: #fff;
+    font-weight: 900; font-size: 16px; text-decoration: none;
+    box-shadow: 0 6px 24px rgba(124,58,237,.35); transition: transform .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+
+  footer {
+    padding: 28px 24px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line); max-width: 800px; margin: 0 auto;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="https://curtaincall-ticketing.com">커튼콜 <span>CurtainCall</span></a>
+  <a class="nav-cta" href="https://curtaincall-ticketing.com">연습 시작 →</a>
+</nav>
+
+<div class="article-hero">
+  <p class="cat">💺 티켓팅 좌석 가이드</p>
+  <h1>콘서트·뮤지컬 좌석 선택 방법<br>& 이선좌 대응 전략</h1>
+  <p class="hero-desc">R석·S석·A석 차이부터 이선좌 상황에서 빠르게 다음 좌석을 고르는 전략까지 정리했습니다.</p>
+</div>
+
+<article>
+
+  <h2>티켓팅 좌석 등급 차이 (R·S·A·VIP)</h2>
+  <p>대부분의 공연은 좌석을 등급으로 나누어 가격과 시야를 구분합니다. 티켓팅 전에 등급별 특징을 파악해두면 이선좌 발생 시 빠른 판단이 가능합니다.</p>
+
+  <div class="grade-grid">
+    <div class="grade-card">
+      <div class="grade-badge r-badge">VIP</div>
+      <div>
+        <h3>VIP석</h3>
+        <p>최전방 또는 무대 중앙 정면 프리미엄 좌석. 공연에 따라 굿즈·포토타임 등 혜택이 포함되기도 합니다. 경쟁이 가장 치열하고 이선좌 발생 빈도가 높습니다.</p>
+      </div>
+    </div>
+    <div class="grade-card">
+      <div class="grade-badge r-badge">R</div>
+      <div>
+        <h3>R석</h3>
+        <p>무대에서 가장 가까운 1~2등급 좌석. 시야와 음향이 가장 좋습니다. 가격이 높고 경쟁이 치열합니다.</p>
+      </div>
+    </div>
+    <div class="grade-card">
+      <div class="grade-badge s-badge">S</div>
+      <div>
+        <h3>S석</h3>
+        <p>R석 다음 등급. 시야가 충분히 좋으면서 가격이 합리적입니다. R석에 이선좌가 발생했을 때 S석을 빠르게 잡는 것이 현실적인 전략입니다.</p>
+      </div>
+    </div>
+    <div class="grade-card">
+      <div class="grade-badge a-badge">A</div>
+      <div>
+        <h3>A석 이하</h3>
+        <p>2층·후면 좌석. 시야는 다소 좁지만 가격이 저렴하고 이선좌 발생이 비교적 낮습니다. 경쟁이 덜한 만큼 빠른 선점이 가능합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>이선좌 상황에서 좌석을 고르는 전략</h2>
+  <p>이선좌가 발생했을 때 좌석 선택을 망설이면 안 됩니다. 다음 전략을 미리 머릿속에 넣어두세요.</p>
+
+  <div class="strategy-list">
+    <div class="strategy-item">
+      <div class="s-icon">🎯</div>
+      <div>
+        <h3>1순위·2순위·3순위 미리 결정하기</h3>
+        <p>티켓팅 전에 원하는 좌석 3개를 순서대로 정해두세요. 이선좌가 발생하면 고민 없이 바로 2순위 좌석 위치로 손가락을 움직일 수 있습니다.</p>
+      </div>
+    </div>
+    <div class="strategy-item">
+      <div class="s-icon">🗺️</div>
+      <div>
+        <h3>좌석 도면 시각적으로 기억하기</h3>
+        <p>1순위 좌석이 도면 어느 위치에 있는지, 2순위 좌석은 어느 방향인지 눈으로 기억해두세요. 화면을 보는 순간 손이 먼저 움직여야 합니다.</p>
+      </div>
+    </div>
+    <div class="strategy-item">
+      <div class="s-icon">⚡</div>
+      <div>
+        <h3>등급을 낮춰서라도 빠르게 선점</h3>
+        <p>R석 이선좌 후에도 R석만 고집하다 전부 이선좌가 나면 S석도 사라집니다. 이선좌 발생 즉시 S석·A석으로 빠르게 전환하는 유연함이 필요합니다.</p>
+      </div>
+    </div>
+    <div class="strategy-item">
+      <div class="s-icon">🔁</div>
+      <div>
+        <h3>반복 연습으로 반사 신경 기르기</h3>
+        <p>전략은 머리로 알아도 실전에서 몸이 굳으면 소용없습니다. 커튼콜에서 이선좌 상황을 반복 연습해 반사적인 좌석 전환이 가능하도록 훈련하세요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p>커튼콜 소극장 모드는 좌석 수가 적어 이선좌 발생 빈도가 높습니다. 빠른 좌석 전환 반응 연습에 가장 효과적입니다.</p>
+  </div>
+
+  <h2>좌석 선택, 연습이 답입니다</h2>
+  <p>좌석 선택 전략을 아무리 잘 알아도 실전에서 패닉이 오면 아무 소용이 없습니다. 커튼콜에서 이선좌 상황을 반복 경험하면서 좌석 전환을 몸에 익히세요.</p>
+
+  <div class="practice-cta">
+    <h3>좌석 선택 속도 지금 테스트해보기</h3>
+    <p>커튼콜에서 이선좌 상황 포함 실전 티켓팅을 무료로 연습할 수 있습니다.</p>
+    <a class="btn-primary" href="https://curtaincall-ticketing.com">🎫 커튼콜에서 좌석 선택 연습하기</a>
+  </div>
+
+</article>
+
+<footer>
+  <p>© 2025 커튼콜 CurtainCall · <a href="https://curtaincall-ticketing.com">홈</a> · <a href="https://curtaincall-ticketing.com/isun-jwa">이선좌 대처법</a> · <a href="https://curtaincall-ticketing.com/ticketing-tips">티켓팅 꿀팁</a></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>티켓팅 시뮬레이션이란? 커튼콜 사용법 안내 | CurtainCall</title>
+<meta name="description" content="티켓팅 시뮬레이션 커튼콜(CurtainCall) 사용법. 극장 선택부터 좌석 선점까지 전 과정을 실전처럼 연습하는 방법을 안내합니다.">
+<meta name="keywords" content="티켓팅 시뮬레이션, 티켓팅 시뮬레이터, 티켓팅 연습 앱, 커튼콜 사용법, 티켓팅 연습 방법">
+<link rel="canonical" href="https://curtaincall-ticketing.com/ticketing-simulation">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="티켓팅 시뮬레이션 커튼콜 사용법 | CurtainCall">
+<meta property="og:description" content="티켓팅 시뮬레이션 커튼콜 사용법을 안내합니다. 극장 선택부터 이선좌 대응까지.">
+<meta property="og:url" content="https://curtaincall-ticketing.com/ticketing-simulation">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "커튼콜 티켓팅 시뮬레이션 사용법",
+  "description": "티켓팅 시뮬레이터 커튼콜에서 실전 티켓팅을 연습하는 방법",
+  "publisher": { "@type": "Organization", "name": "커튼콜 CurtainCall" }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0b0f1a; --surface: #111827; --surface2: #1a2133;
+    --accent: #7c3aed; --accent2: #a78bfa;
+    --text: #f9fafb; --muted: #6b7280; --line: #1f2937;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 60px;
+    background: rgba(11,15,26,.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo { font-weight: 900; font-size: 18px; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent2); }
+  .nav-cta {
+    display: inline-flex; align-items: center;
+    padding: 8px 18px; border-radius: 999px;
+    background: var(--accent); color: #fff;
+    font-weight: 700; font-size: 14px; text-decoration: none; transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  .article-hero {
+    padding: 64px 24px 48px; max-width: 800px; margin: 0 auto;
+    border-bottom: 1px solid var(--line);
+  }
+  .cat { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; }
+  h1 { font-size: clamp(26px, 5vw, 40px); font-weight: 900; letter-spacing: -.03em; margin-bottom: 14px; word-break: keep-all; line-height: 1.2; }
+  .hero-desc { color: #9ca3af; font-size: 16px; word-break: keep-all; }
+
+  article { max-width: 800px; margin: 0 auto; padding: 48px 24px 72px; }
+  h2 { font-size: clamp(20px, 3vw, 26px); font-weight: 900; letter-spacing: -.02em; margin: 48px 0 14px; word-break: keep-all; }
+  h2:first-of-type { margin-top: 0; }
+  p { color: #d1d5db; font-size: 15px; margin-bottom: 14px; word-break: keep-all; line-height: 1.8; }
+  strong { color: var(--text); }
+
+  /* 화면 단계 카드 */
+  .steps-visual { display: grid; gap: 16px; margin: 20px 0; }
+  .step-card {
+    display: flex; gap: 18px; align-items: flex-start;
+    padding: 20px; border-radius: 16px;
+    background: var(--surface); border: 1px solid var(--line);
+  }
+  .step-icon {
+    width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px;
+    background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25);
+    display: grid; place-items: center; font-size: 22px;
+  }
+  .step-card h3 { font-weight: 900; font-size: 16px; margin-bottom: 5px; }
+  .step-card p { color: var(--muted); font-size: 14px; margin: 0; line-height: 1.6; word-break: keep-all; }
+
+  /* 극장 비교 */
+  .theater-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+  .theater-card {
+    padding: 20px; border-radius: 16px;
+    background: var(--surface); border: 1px solid var(--line);
+    text-align: center;
+  }
+  .theater-emoji { font-size: 36px; margin-bottom: 12px; }
+  .theater-card h3 { font-weight: 900; font-size: 16px; margin-bottom: 6px; }
+  .theater-card .difficulty {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; margin-bottom: 8px;
+  }
+  .easy { background: rgba(16,185,129,.12); color: #6ee7b7; }
+  .medium { background: rgba(245,158,11,.12); color: #fcd34d; }
+  .hard { background: rgba(239,68,68,.12); color: #fca5a5; }
+  .theater-card p { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.5; word-break: keep-all; }
+
+  .callout {
+    padding: 18px 20px; border-radius: 14px; margin: 16px 0;
+    background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.2);
+  }
+  .callout p { margin: 0; color: #c4b5fd; font-size: 14px; }
+
+  .practice-cta {
+    margin: 48px 0 0; padding: 36px; border-radius: 20px;
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(167,139,250,.06));
+    border: 1px solid rgba(124,58,237,.3); text-align: center;
+  }
+  .practice-cta h3 { font-weight: 900; font-size: 22px; margin-bottom: 10px; }
+  .practice-cta p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 32px; border-radius: 12px;
+    background: var(--accent); color: #fff;
+    font-weight: 900; font-size: 17px; text-decoration: none;
+    box-shadow: 0 6px 24px rgba(124,58,237,.35); transition: transform .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+
+  footer {
+    padding: 28px 24px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line); max-width: 800px; margin: 0 auto;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="https://curtaincall-ticketing.com">커튼콜 <span>CurtainCall</span></a>
+  <a class="nav-cta" href="https://curtaincall-ticketing.com">연습 시작 →</a>
+</nav>
+
+<div class="article-hero">
+  <p class="cat">🎭 커튼콜 소개</p>
+  <h1>티켓팅 시뮬레이션이란?<br>커튼콜 완전 사용 가이드</h1>
+  <p class="hero-desc">티켓팅 시뮬레이터 커튼콜의 전체 기능과 사용 방법을 안내합니다. 처음 방문하셨다면 여기서 시작하세요.</p>
+</div>
+
+<article>
+
+  <h2>티켓팅 시뮬레이션이란?</h2>
+  <p>
+    <strong>티켓팅 시뮬레이션</strong>은 실제 온라인 티켓 예매 과정을 그대로 재현한 연습 도구입니다. 실제 좌석을 구매하는 것이 아니라, 실전과 동일한 화면 흐름(카운트다운 → 보안문자 → 좌석 선택)을 반복 연습할 수 있습니다.
+  </p>
+  <p>
+    커튼콜(CurtainCall)은 뮤지컬·콘서트 팬들을 위해 만들어진 <strong>무료 티켓팅 시뮬레이터</strong>입니다. 앱 설치 없이 브라우저에서 바로 이용할 수 있습니다.
+  </p>
+
+  <h2>커튼콜 시뮬레이션 전체 흐름</h2>
+  <div class="steps-visual">
+    <div class="step-card">
+      <div class="step-icon">🏟️</div>
+      <div>
+        <h3>STEP 1. 극장 선택</h3>
+        <p>대극장·중극장·소극장 중 연습할 공연 규모를 선택합니다. 극장 종류에 따라 좌석 수와 난이도가 달라집니다.</p>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">⏱️</div>
+      <div>
+        <h3>STEP 2. 오픈 카운트다운</h3>
+        <p>티켓 오픈 시간 카운트다운이 진행됩니다. 0이 되는 순간 즉시 예매하기 버튼을 눌러야 합니다.</p>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">🔤</div>
+      <div>
+        <h3>STEP 3. 보안문자 입력</h3>
+        <p>노이즈가 있는 보안문자를 빠르고 정확하게 입력합니다. 오입력 시 다시 시도해야 합니다.</p>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">💺</div>
+      <div>
+        <h3>STEP 4. 좌석 선택</h3>
+        <p>좌석 도면에서 원하는 좌석을 클릭합니다. 이선좌 상황이 랜덤 발생하며, 빠르게 다른 좌석을 선택해야 합니다.</p>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-icon">🎉</div>
+      <div>
+        <h3>STEP 5. 예매 완료</h3>
+        <p>좌석 선점 성공! 총 소요 시간이 기록됩니다. 반복 연습으로 기록을 단축해보세요.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>극장별 난이도</h2>
+  <p>커튼콜은 공연 규모에 맞게 세 가지 극장 모드를 제공합니다.</p>
+  <div class="theater-grid">
+    <div class="theater-card">
+      <div class="theater-emoji">🏟️</div>
+      <h3>대극장</h3>
+      <span class="difficulty hard">어려움</span>
+      <p>올림픽홀·잠실주경기장급. 좌석 수가 많아 선택지가 넓지만, 경쟁도 극도로 치열합니다.</p>
+    </div>
+    <div class="theater-card">
+      <div class="theater-emoji">🎭</div>
+      <h3>중극장</h3>
+      <span class="difficulty medium">보통</span>
+      <p>블루스퀘어·LG아트센터급. 뮤지컬·중형 콘서트 티켓팅 연습에 적합합니다.</p>
+    </div>
+    <div class="theater-card">
+      <div class="theater-emoji">🪑</div>
+      <h3>소극장</h3>
+      <span class="difficulty easy">입문</span>
+      <p>300석 내외 소극장. 좌석 수가 적어 이선좌 발생 빈도가 높습니다. 반응 속도 연습에 최적.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p>처음이라면 소극장부터 시작해서 이선좌 대응에 익숙해진 다음 대극장으로 올라가는 것을 추천합니다.</p>
+  </div>
+
+  <h2>커튼콜이 실제 티켓팅에 도움이 되는 이유</h2>
+  <p>운동도 근육 기억(muscle memory)이 필요합니다. 티켓팅도 마찬가지입니다. 한 번도 연습 없이 실전에 임하는 것과, 수십 번 같은 상황을 경험한 상태로 임하는 것은 반응 속도와 침착함이 완전히 다릅니다.</p>
+  <p>커튼콜은 <strong>보안문자 입력 속도</strong>, <strong>좌석 클릭 반응 속도</strong>, <strong>이선좌 대응 침착성</strong> 세 가지를 반복 훈련할 수 있도록 설계되었습니다.</p>
+
+  <div class="practice-cta">
+    <h3>지금 바로 시뮬레이션 시작</h3>
+    <p>가입 불필요. 브라우저에서 바로 실행됩니다.</p>
+    <a class="btn-primary" href="https://curtaincall-ticketing.com">🎫 커튼콜 티켓팅 시뮬레이션 시작</a>
+  </div>
+
+</article>
+
+<footer>
+  <p>© 2025 커튼콜 CurtainCall · <a href="https://curtaincall-ticketing.com">홈</a> · <a href="https://curtaincall-ticketing.com/ticketing-practice">티켓팅 연습</a> · <a href="https://curtaincall-ticketing.com/isun-jwa">이선좌 대처법</a></p>
+</footer>
+
+</body>
+</html>
